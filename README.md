@@ -67,6 +67,6 @@
 
 <div align="center">
 
-[![CommitPulse Contribution Graph for vrally28](https://commitpulse.vercel.app/api/streak?user=vrally28&accent=38BDF8)](https://commitpulse.vercel.app/dashboard/vrally28)
+![CommitPulse Contribution Graph for vrally28](https://commitpulse.vercel.app/api/streak?user=vrally28&theme=dark&view=skyline)
 
 </div>
