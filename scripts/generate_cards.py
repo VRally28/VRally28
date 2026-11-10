@@ -151,13 +151,24 @@ def save(name: str, svg: str) -> None:
 
 
 def draw_hero() -> None:
-    s = start(1200, 300, True)
-    s += t(48, 54, "VANSH RALLY  /  GITHUB PROFILE", 11, C["blue"], 750, 'letter-spacing="2.2"')
-    s += t(48, 143, "Building, learning,", 66, C["white"], 400, 'class="serif" letter-spacing="-2"')
-    s += t(48, 211, "and figuring things out.", 66, C["white"], 400, 'class="serif" letter-spacing="-2"')
-    s += t(52, 254, "CSE STUDENT  ·  DEVELOPER  ·  OPEN-SOURCE CONTRIBUTOR", 11, C["muted"], 650, 'letter-spacing="1.4"')
-    s += '<path d="M48 274 H1152" stroke="#d8d8d2" stroke-width="1"/>'
-    s += '<circle cx="1152" cy="274" r="4" fill="#2f55ff"/>'
+    # Editorial hero: typography-led, with an abstract animated code motif instead of a borrowed portrait.
+    s = start(880, 420, True)
+    s += t(48, 55, "VANSH RALLY  /  CSE · THAPAR", 11, C["blue"], 750, 'letter-spacing="2"')
+    s += '<circle cx="54" cy="104" r="4" fill="#2f55ff"><animate attributeName="opacity" values="1;.25;1" dur="1.8s" repeatCount="indefinite"/></circle>'
+    s += '<text x="72" y="109" font-size="10" fill="#6e6e73" letter-spacing="1.4">BUILDING IN PUBLIC · LEARNING BY DOING</text>'
+    s += '<text x="44" y="222" font-family="Georgia,Times New Roman,serif" font-size="106" letter-spacing="-3" fill="#111111">Vansh</text>'
+    s += '<text x="44" y="318" font-family="Georgia,Times New Roman,serif" font-style="italic" font-size="106" letter-spacing="-3" fill="#2f55ff">Rally.</text>'
+    s += '<text x="48" y="362" font-size="17" fill="#3a3a3c">I build things for the web, explore systems,</text>'
+    s += '<text x="48" y="386" font-size="17" fill="#3a3a3c">and turn ideas into working projects.</text>'
+    # Abstract terminal / signal motif on the right.
+    s += '<g transform="translate(604 118)" fill="none" stroke="#111111" stroke-width="1.2" opacity=".9">'
+    s += '<rect x="0" y="0" width="220" height="170" rx="8" stroke="#dcdcd7"/>'
+    s += '<path d="M0 28H220" stroke="#dcdcd7"/><circle cx="16" cy="14" r="3" fill="#ef3b2d" stroke="none"/><circle cx="29" cy="14" r="3" fill="#ffc81a" stroke="none"/><circle cx="42" cy="14" r="3" fill="#2f55ff" stroke="none"/>'
+    s += '<path d="M24 58h35m-35 22h66m-66 22h45m-45 22h83" stroke="#2f55ff" stroke-linecap="round"/>'
+    s += '<path d="M132 56l22 22-22 22m30 0h28" stroke="#ef3b2d" stroke-linecap="round" stroke-linejoin="round"/>'
+    s += '<circle cx="176" cy="134" r="18" stroke="#ffc81a"><animate attributeName="r" values="12;26;12" dur="3.5s" repeatCount="indefinite"/></circle>'
+    s += '</g>'
+    s += '<path d="M48 402H832" stroke="#dcdcd7"/><circle cx="832" cy="402" r="4" fill="#2f55ff"/>'
     save("hero.svg", s)
 
 def draw_social() -> None:
@@ -188,18 +199,18 @@ def draw_activity(data: dict) -> None:
 
 def project_card(filename: str, index: str, name: str, description: str,
                  tags: str, motif: str) -> None:
-    s = start(390, 190, True)
+    s = start(293, 198, True)
     accent = C["blue"] if index == "01" else (C["violet"] if index == "02" else C["green"])
-    s += f'<rect x="18" y="18" width="354" height="154" rx="3" fill="{C["bg"]}" stroke="{C["line"]}"/>'
-    s += f'<rect x="18" y="18" width="4" height="154" fill="{accent}"/>'
-    s += t(38, 48, "PROJECT  /  " + index, 9, C["dim"], 750, 'letter-spacing="1.5"')
-    s += t(38, 87, name, 22, C["white"], 750, 'letter-spacing="-.4"')
-    lines = [description[i:i+37] for i in range(0, min(len(description), 74), 37)]
+    s += f'<rect x="8" y="8" width="277" height="182" rx="3" fill="{C["bg"]}" stroke="{C["line"]}"/>'
+    s += f'<rect x="8" y="8" width="4" height="182" fill="{accent}"/>'
+    s += t(26, 39, "PROJECT  /  " + index, 9, C["dim"], 750, 'letter-spacing="1.5"')
+    s += t(26, 82, name, 22, C["white"], 750, 'letter-spacing="-.4"')
+    lines = [description[i:i+31] for i in range(0, min(len(description), 62), 37)]
     for j, line in enumerate(lines[:2]):
-        s += t(38, 115 + j*17, line, 10, C["muted"], 500)
-    s += f'<path d="M38 151 H352" stroke="{C["line"]}" stroke-width="1"/>'
-    s += t(38, 165, tags, 8, accent, 700, 'letter-spacing=".4"')
-    s += t(348, 48, "↗", 17, accent, 650, 'text-anchor="end"')
+        s += t(26, 111 + j*16, line, 10, C["muted"], 500)
+    s += f'<path d="M26 155 H266" stroke="{C["line"]}" stroke-width="1"/>'
+    s += t(26, 176, tags, 8, accent, 700, 'letter-spacing=".4"')
+    s += t(266, 39, "↗", 17, accent, 650, 'text-anchor="end"')
     save(filename, s)
 
 def draw_contributions(data: dict) -> None:
@@ -252,8 +263,10 @@ def main() -> None:
         raise FileNotFoundError("Missing data/contributions.json. Run the contribution refresh first.")
     data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
     draw_hero()
-    draw_social()
     draw_activity(data)
+    draw_world_tile("build.svg", "BUILD", "Web & systems", "React, JavaScript, Python and backend fundamentals.", C["blue"], 0.25)
+    draw_world_tile("learn.svg", "LEARN", "Always curious", "CSE at Thapar. Exploring AI, systems and open source.", C["green"], 0.45)
+    draw_world_tile("community.svg", "COMMUNITY", "Build together", "Hackathons, society work and first open-source PRs.", C["violet"], 0.65)
     draw_section_title()
     project_card("repo-codevibe.svg", "01", "CODEVIBE",
                  "A browser-based coding practice platform.",
