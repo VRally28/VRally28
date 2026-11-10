@@ -5,9 +5,6 @@ from __future__ import annotations
 import base64
 import json
 import os
-import subprocess
-import sys
-import tempfile
 import urllib.request
 from collections import Counter
 from datetime import date, datetime, timedelta, timezone
@@ -124,15 +121,13 @@ def delay(seconds: float) -> str:
 
 
 def hero() -> None:
-    portrait_file = OUT / "portrait-ascii.svg"
-    if not portrait_file.exists():
-        raise FileNotFoundError("Run scripts/make_ascii_svg.py before rendering the hero card.")
-    portrait_svg = portrait_file.read_text(encoding="utf-8")
-    root_end = portrait_svg.find(">")
-    close = portrait_svg.rfind("</svg>")
-    if root_end < 0 or close < root_end:
-        raise ValueError("cards/portrait-ascii.svg is not a valid SVG document.")
-    graphic = f'<g transform="translate(525 42) scale(.39)">{portrait_svg[root_end+1:close]}</g>'
+    image = ROOT / "assets" / "portrait.png"
+    encoded = base64.b64encode(image.read_bytes()).decode("ascii")
+    graphic = f'''<defs><clipPath id="portrait-circle"><circle cx="705" cy="205" r="120"/></clipPath></defs>
+    <g class="f" {delay(.45)}><circle cx="705" cy="205" r="136" fill="#e7eaff"/>
+    <circle cx="705" cy="205" r="128" fill="none" stroke="{BLUE}" stroke-opacity=".22" stroke-width="1"/>
+    <image href="data:image/png;base64,{encoded}" x="585" y="85" width="240" height="240" preserveAspectRatio="xMidYMid slice" clip-path="url(#portrait-circle)"/>
+    <circle cx="705" cy="205" r="120" fill="none" stroke="{BLUE}" stroke-width="2"/></g>'''
     body = f'''<rect width="880" height="420" rx="14" fill="{PAPER}"/>
     <g class="f" {delay(0)}><rect class="live" x="48" y="49" width="8" height="8" rx="2" fill="{BLUE}"/>{text(66,57,"CSE STUDENT · THAPAR INSTITUTE",12,MUTED,"monospace",'letter-spacing="1"')}</g>
     <text class="r serif" {delay(.15)} x="44" y="190" font-size="112" letter-spacing="-3" fill="{INK}">Vansh</text>
@@ -220,10 +215,6 @@ def main() -> None:
     if os.getenv("GH_TOKEN"): refresh_data()
     if not DATA.exists(): raise FileNotFoundError("Missing data/contributions.json; refresh contribution data first.")
     data=json.loads(DATA.read_text(encoding="utf-8"))
-    with tempfile.TemporaryDirectory(prefix="profile-cards-") as temp:
-        prepared = Path(temp) / "portrait-prepped.png"
-        subprocess.run([sys.executable, str(ROOT / "scripts" / "prep_photo.py"), str(ROOT / "assets" / "portrait.png"), str(prepared)], check=True)
-        subprocess.run([sys.executable, str(ROOT / "scripts" / "make_ascii_svg.py"), str(prepared), str(OUT / "portrait-ascii.svg")], check=True)
     hero()
     heatmap(data)
     activity(data)

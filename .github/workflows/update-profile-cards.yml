@@ -33,7 +33,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install font subset tooling
-        run: python -m pip install --upgrade fonttools brotli pillow numpy opencv-python-headless "rembg[cpu]"
+        run: python -m pip install --upgrade fonttools brotli
 
       - name: Download and subset Inter
         run: |
@@ -45,16 +45,6 @@ jobs:
             --output-file=assets/Inter-subset.woff2 \
             --flavor=woff2 \
             --unicodes="U+0020-007E,U+00B7,U+2022,U+2197,U+2192,U+25CE,U+2014"
-
-      - name: Download and subset IBM Plex Mono
-        run: |
-          curl -L --fail --silent --show-error \
-            "https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexmono/IBMPlexMono-Regular.ttf" \
-            -o /tmp/IBMPlexMono.ttf
-          python -m fontTools.subset /tmp/IBMPlexMono.ttf \
-            --output-file=assets/Mono-subset.woff2 \
-            --flavor=woff2 \
-            --unicodes="U+0020-007E"
 
       - name: Fetch contribution data and render SVGs
         env:
