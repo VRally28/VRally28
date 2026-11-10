@@ -311,14 +311,14 @@ def draw_contributions(data: dict) -> None:
     days = days[-364:]
     day_map = {item["date"]: int(item["contributionCount"]) for item in days}
     palette = ["#17253A", "#173D58", "#17628A", "#248CB5", "#45C9F5"]
-    s = start(1200, 224, True)
+    s = start(1200, 236, True)
     s += t(36, 43, "THE CONTRIBUTION GRID", 11, C["blue"], 800, 'letter-spacing="2.4"')
     s += t(36, 72, "Small steps. Compounded.", 25, C["white"], 750)
-    s += t(1160, 43, "LAST 52 WEEKS", 9, C["dim"], 750, 'text-anchor="end" letter-spacing="1.5"')
+    s += t(1160, 17, "LAST 52 WEEKS", 9, C["dim"], 750, 'text-anchor="end" letter-spacing="1.5"')
     s += t(36, 117, "MON", 8, C["dim"], 650)
     s += t(36, 157, "WED", 8, C["dim"], 650)
     s += t(36, 197, "FRI", 8, C["dim"], 650)
-    start_x, start_y, step, cell = 86, 87, 20, 13
+    start_x, start_y, step, cell = 86, 89, 20, 16
     # Month labels sit just above the grid at the first week of each month.
     previous_month = None
     for col in range(52):
