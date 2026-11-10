@@ -177,7 +177,7 @@ def draw_social() -> None:
 
 def draw_activity(data: dict) -> None:
     placeholder = bool(data.get("placeholder", False))
-    s = start(1200, 250, True)
+    s = start(880, 250, True)
     s += t(48, 48, "GITHUB / ACTIVITY", 10, C["blue"], 750, 'letter-spacing="2"')
     s += t(48, 91, "A year of showing up.", 38, C["white"], 400, 'class="serif"')
     stats = [
@@ -187,11 +187,11 @@ def draw_activity(data: dict) -> None:
         ("LONGEST STREAK", "—" if placeholder else f'{data.get("longest_streak", 0)} days')
     ]
     for i, (label, value) in enumerate(stats):
-        x = 48 + i * 282
+        x = 48 + i * 196
         s += f'<path d="M{x} 125 V220" stroke="{C["line"]}" stroke-width="1"/>'
         s += t(x + 18, 151, label, 9, C["dim"], 750, 'letter-spacing="1.2"')
         s += t(x + 18, 194, value, 30, C["white"], 650, 'class="serif"')
-    s += f'<path d="M48 220 H1152" stroke="{C["line"]}" stroke-width="1"/>'
+    s += f'<path d="M48 220 H832" stroke="{C["line"]}" stroke-width="1"/>'
     busy = data.get("busiest_day", {})
     busy_text = "Busiest day: awaiting first data sync" if placeholder else f'BUSIEST DAY  /  {busy.get("date", "—")}  ·  {busy.get("count", 0)} CONTRIBUTIONS'
     s += t(48, 239, busy_text, 9, C["muted"], 600, 'letter-spacing=".8"')
@@ -205,7 +205,7 @@ def project_card(filename: str, index: str, name: str, description: str,
     s += f'<rect x="8" y="8" width="4" height="182" fill="{accent}"/>'
     s += t(26, 39, "PROJECT  /  " + index, 9, C["dim"], 750, 'letter-spacing="1.5"')
     s += t(26, 82, name, 22, C["white"], 750, 'letter-spacing="-.4"')
-    lines = [description[i:i+31] for i in range(0, min(len(description), 62), 37)]
+    lines = [description[i:i+31] for i in range(0, min(len(description), 62), 31)]
     for j, line in enumerate(lines[:2]):
         s += t(26, 111 + j*16, line, 10, C["muted"], 500)
     s += f'<path d="M26 155 H266" stroke="{C["line"]}" stroke-width="1"/>'
@@ -220,10 +220,10 @@ def draw_contributions(data: dict) -> None:
         days = [{"date": (today - timedelta(days=364-i)).isoformat(), "contributionCount": 0} for i in range(365)]
     days = days[-364:]
     palette = ["#e5e5e1", "#c8d2ff", "#8fa4ff", "#536fff", "#2f55ff"]
-    s = start(1200, 270, True)
+    s = start(880, 270, True)
     s += t(48, 48, "CONTRIBUTION HISTORY", 10, C["blue"], 750, 'letter-spacing="2"')
     s += t(48, 91, "Small steps. Compounded.", 38, C["white"], 400, 'class="serif"')
-    s += t(1152, 45, "LAST 52 WEEKS", 9, C["dim"], 650, 'text-anchor="end" letter-spacing="1.4"')
+    s += t(832, 45, "LAST 52 WEEKS", 9, C["dim"], 650, 'text-anchor="end" letter-spacing="1.4"')
     start_x, start_y, step, cell = 48, 126, 16, 12
     previous_month = None
     for col in range(52):
@@ -249,10 +249,10 @@ def draw_contributions(data: dict) -> None:
     save("contributions.svg", s)
 
 def draw_section_title() -> None:
-    s = start(1200, 68)
+    s = start(880, 68)
     s += t(48, 44, "WHAT I'M BUILDING", 13, C["white"], 750, 'letter-spacing="2.2"')
-    s += '<path d="M280 39 H1152" stroke="#d8d8d2" stroke-width="1"/>'
-    s += '<circle cx="1152" cy="39" r="3" fill="#2f55ff"/>'
+    s += '<path d="M280 39 H832" stroke="#d8d8d2" stroke-width="1"/>'
+    s += '<circle cx="832" cy="39" r="3" fill="#2f55ff"/>'
     save("title-coding.svg", s)
 
 
