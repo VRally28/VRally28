@@ -22,7 +22,7 @@ def fetch_contributions():
     query = """query($login:String!){user(login:$login){contributionsCollection(from:FROM,to:TO){contributionCalendar{totalContributions weeks{contributionDays{date contributionCount}}}}}}"""
     today = date.today()
     start = today - timedelta(days=364)
-    q = query.replace("FROM", start.isoformat() + "T00:00:00Z").replace("TO", today.isoformat() + "T23:59:59Z")
+    q = query.replace("FROM", '"' + start.isoformat() + "T00:00:00Z" + '"').replace("TO", '"' + today.isoformat() + "T23:59:59Z" + '"')
     body = json.dumps({"query": q, "variables": {"login": user}}).encode()
     req = urllib.request.Request("https://api.github.com/graphql", data=body, headers={
         "Authorization": f"Bearer {token}", "Content-Type": "application/json",
