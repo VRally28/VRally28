@@ -140,7 +140,7 @@ def hero() -> None:
     <text class="r serif" {delay(.3)} x="44" y="290" font-style="italic" font-size="112" letter-spacing="-3" fill="{INK}">Rally</text>
     <g class="r" {delay(.55)}>{text(48,351,"I build useful things on the web and learn by making.",18,SOFT)}</g>
     <g class="f" {delay(.8)}>{text(48,402,"BUILD · EXPLORE · CONTRIBUTE",12,MUTED,"monospace",'letter-spacing=".8"')}</g>{graphic}'''
-    write("hero-photo.svg", 880, 420, body, "Vansh Rally — CSE student and developer building useful things on the web.")
+    write("hero-photo-v2.svg", 880, 420, body, "Vansh Rally — CSE student and developer building useful things on the web.")
 
 
 def heatmap(data: dict) -> None:
