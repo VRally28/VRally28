@@ -133,7 +133,7 @@ def hero() -> None:
     close = portrait_svg.rfind("</svg>")
     if root_end < 0 or close < root_end:
         raise ValueError("cards/portrait-ascii.svg is not a valid SVG document.")
-    graphic = f'<g transform="translate(570 38) scale(.34)">{portrait_svg[root_end+1:close]}</g>'
+    graphic = f'<g transform="translate(490 18) scale(.43)">{portrait_svg[root_end+1:close]}</g>'
     body = f'''<defs><linearGradient id="shine" x1="0" x2="1"><stop offset="0" stop-color="{INK}"/><stop offset=".5" stop-color="{INK}"/><stop offset=".56" stop-color="{BLUE}"/><stop offset=".62" stop-color="{INK}"/><stop offset="1" stop-color="{INK}"/>{smil}</linearGradient></defs>
     <rect width="880" height="420" rx="14" fill="{PAPER}"/>
     <g class="f" {delay(0)}><rect class="live" x="48" y="49" width="8" height="8" rx="2" fill="{BLUE}"/>{text(66,57,"CSE STUDENT · THAPAR INSTITUTE",12,MUTED,"monospace",'letter-spacing="1"')}</g>
