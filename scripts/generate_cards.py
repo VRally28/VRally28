@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+from io import BytesIO
 import json
 import os
 import urllib.request
@@ -10,6 +11,7 @@ from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from xml.sax.saxutils import escape
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "contributions.json"
@@ -122,11 +124,15 @@ def delay(seconds: float) -> str:
 
 def hero() -> None:
     image = ROOT / "assets" / "portrait.png"
-    encoded = base64.b64encode(image.read_bytes()).decode("ascii")
+    portrait = Image.open(image).convert("RGB")
+    portrait.thumbnail((640, 640), Image.Resampling.LANCZOS)
+    optimized = BytesIO()
+    portrait.save(optimized, format="JPEG", quality=90, optimize=True)
+    encoded = base64.b64encode(optimized.getvalue()).decode("ascii")
     graphic = f'''<defs><clipPath id="portrait-circle"><circle cx="705" cy="205" r="120"/></clipPath></defs>
     <g class="f" {delay(.45)}><circle cx="705" cy="205" r="136" fill="#e7eaff"/>
     <circle cx="705" cy="205" r="128" fill="none" stroke="{BLUE}" stroke-opacity=".22" stroke-width="1"/>
-    <image href="data:image/png;base64,{encoded}" x="585" y="85" width="240" height="240" preserveAspectRatio="xMidYMid slice" clip-path="url(#portrait-circle)"/>
+    <image href="data:image/jpeg;base64,{encoded}" x="585" y="85" width="240" height="240" preserveAspectRatio="xMidYMid slice" clip-path="url(#portrait-circle)"/>
     <circle cx="705" cy="205" r="120" fill="none" stroke="{BLUE}" stroke-width="2"/></g>'''
     body = f'''<rect width="880" height="420" rx="14" fill="{PAPER}"/>
     <g class="f" {delay(0)}><rect class="live" x="48" y="49" width="8" height="8" rx="2" fill="{BLUE}"/>{text(66,57,"CSE STUDENT · THAPAR INSTITUTE",12,MUTED,"monospace",'letter-spacing="1"')}</g>

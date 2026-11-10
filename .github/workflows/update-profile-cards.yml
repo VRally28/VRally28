@@ -33,7 +33,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install font subset tooling
-        run: python -m pip install --upgrade fonttools brotli
+        run: python -m pip install --upgrade fonttools brotli pillow
 
       - name: Download and subset Inter
         run: |
