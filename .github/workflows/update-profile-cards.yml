@@ -36,7 +36,7 @@ jobs:
           python -m fontTools.subset /tmp/Inter.ttf \
             --output-file=assets/Inter-subset.woff2 \
             --flavor=woff2 \
-            --unicodes="U+0020-007E,U+00B7,U+2022,U+2197,U+25CE,U+2014"
+            --unicodes="U+0020-007E,U+00B7,U+2022,U+2197,U+2192,U+25CE,U+2014"
 
       - name: Fetch contribution data and render SVGs
         env:
