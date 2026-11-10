@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
-"""Build the animated SVG components used by the VRally28 profile README."""
+"""Render the VRally28 GitHub profile as a coordinated set of editorial SVG cards.
+
+The renderer intentionally keeps all visual content local to SVG files so the
+profile README works without JavaScript, remote stylesheets, or badge services.
+Set STATIC=1 to render stable end-state frames for screenshots and validation.
+"""
 from __future__ import annotations
 
 import base64
 import json
 import os
+import textwrap
 import urllib.request
 from collections import Counter
 from datetime import date, datetime, timedelta, timezone
@@ -16,15 +22,23 @@ DATA_FILE = ROOT / "data" / "contributions.json"
 CARD_DIR = ROOT / "cards"
 FONT_FILE = ROOT / "assets" / "Inter-subset.woff2"
 STATIC = os.getenv("STATIC") == "1"
-
-C = {
-    "bg": "#f3f3f1", "panel": "#f3f3f1", "panel2": "#e8e8e4",
-    "line": "#d8d8d2", "blue": "#2f55ff", "cyan": "#2f55ff",
-    "violet": "#ef3b2d", "white": "#111111", "muted": "#626267",
-    "dim": "#85858a", "green": "#ffc81a"
-}
 USER = os.getenv("GH_USER", "VRally28")
 
+# Editorial palette: paper, ink, cobalt, and restrained neutral tints.
+C = {
+    "paper": "#F5F4F0",
+    "surface": "#FBFAF7",
+    "surface_alt": "#ECEBE6",
+    "ink": "#17191F",
+    "muted": "#646873",
+    "quiet": "#9296A0",
+    "line": "#D9D9D3",
+    "cobalt": "#315BEE",
+    "cobalt_mid": "#7893F7",
+    "cobalt_pale": "#DCE4FF",
+    "cobalt_faint": "#EEF1FF",
+    "white": "#FFFFFF",
+}
 
 def fetch_contributions() -> None:
     token = os.getenv("GH_TOKEN")
@@ -41,8 +55,7 @@ def fetch_contributions() -> None:
     payload = json.dumps({"query": query, "variables": {"login": USER}}).encode()
     request = urllib.request.Request(
         "https://api.github.com/graphql", data=payload,
-        headers={"Authorization": f"Bearer {token}",
-                 "Content-Type": "application/json",
+        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json",
                  "User-Agent": "VRally28-profile-cards"}
     )
     with urllib.request.urlopen(request, timeout=30) as response:
@@ -61,8 +74,7 @@ def fetch_contributions() -> None:
     while by_date.get(cursor, 0) > 0:
         current_streak += 1
         cursor -= timedelta(days=1)
-    longest_streak = 0
-    streak = 0
+    longest_streak = streak = 0
     for day in days:
         streak = streak + 1 if int(day["contributionCount"]) else 0
         longest_streak = max(longest_streak, streak)
@@ -85,10 +97,7 @@ def fetch_contributions() -> None:
         "active_days": len(active),
         "current_streak": current_streak,
         "longest_streak": longest_streak,
-        "busiest_day": {
-            "date": busiest["date"],
-            "count": int(busiest["contributionCount"])
-        },
+        "busiest_day": {"date": busiest["date"], "count": int(busiest["contributionCount"])},
         "monthly": {month: int(monthly.get(month, 0)) for month in months[-12:]},
         "days": days
     }, indent=2) + "\n", encoding="utf-8")
@@ -104,44 +113,54 @@ def font_css() -> str:
 def defs() -> str:
     return f"""
     <defs>
-      <pattern id="paper" width="24" height="24" patternUnits="userSpaceOnUse">
-        <path d="M24 0H0V24" fill="none" stroke="{C['line']}" stroke-opacity=".22" stroke-width="1"/>
+      <pattern id="paper-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+        <path d="M28 0H0V28" fill="none" stroke="{C['line']}" stroke-opacity=".25" stroke-width="1"/>
       </pattern>
+      <linearGradient id="cobalt-wash" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="{C['cobalt_pale']}"/>
+        <stop offset="1" stop-color="{C['surface']}"/>
+      </linearGradient>
       <style>
         {font_css()}
-        text{{font-family:Inter,ui-sans-serif,system-ui,sans-serif}}
+        text{{font-family:Inter,Arial,sans-serif}}
         .serif{{font-family:Georgia,'Times New Roman',serif;font-weight:400}}
-        .eyebrow{{font-size:11px;font-weight:750;letter-spacing:2px;fill:{C['blue']}}}
-        .heading{{font-size:25px;font-weight:750;fill:{C['white']}}}
-        .body{{font-size:13px;font-weight:450;fill:{C['muted']}}}
-        .small{{font-size:10px;font-weight:600;fill:{C['muted']}}}
-        .enter{{animation:rise .7s ease both}}
-        .bar{{transform-box:fill-box;transform-origin:bottom;animation:barIn .8s ease both}}
-        .heat{{transform-box:fill-box;transform-origin:center;animation:heatIn .45s ease both}}
-        @keyframes rise{{from{{opacity:0;transform:translateY(8px)}}to{{opacity:1;transform:translateY(0)}}}}
-        @keyframes barIn{{from{{transform:scaleY(.05);opacity:.3}}to{{transform:scaleY(1);opacity:1}}}}
-        @keyframes heatIn{{from{{opacity:.2;transform:scale(.7)}}to{{opacity:1;transform:scale(1)}}}}
-        .static *{{animation:none!important;opacity:1;transform:none;stroke-dashoffset:0}}
-        @media(prefers-reduced-motion:reduce){{.enter,.bar,.heat{{animation:none!important;opacity:1;transform:none}}}}
+        .eyebrow{{font-size:10px;font-weight:750;letter-spacing:1.8px;fill:{C['cobalt']}}}
+        .label{{font-size:9px;font-weight:750;letter-spacing:1.25px;fill:{C['quiet']}}}
+        .body{{font-size:12px;font-weight:450;fill:{C['muted']}}}
+        .small{{font-size:9px;font-weight:600;fill:{C['muted']}}}
+        .rise{{animation:rise .72s cubic-bezier(.2,.75,.25,1) both}}
+        .bar{{transform-box:fill-box;transform-origin:bottom;animation:barIn .85s cubic-bezier(.2,.75,.25,1) both}}
+        .heat{{transform-box:fill-box;transform-origin:center;animation:heatIn .42s ease both}}
+        .pulse{{animation:pulse 2.4s ease-in-out infinite}}
+        @keyframes rise{{from{{opacity:0;transform:translateY(10px)}}to{{opacity:1;transform:translateY(0)}}}}
+        @keyframes barIn{{from{{transform:scaleY(.04);opacity:.35}}to{{transform:scaleY(1);opacity:1}}}}
+        @keyframes heatIn{{from{{opacity:.18;transform:scale(.72)}}to{{opacity:1;transform:scale(1)}}}}
+        @keyframes pulse{{0%,100%{{opacity:.45}}50%{{opacity:1}}}}
+        .static *{{animation:none!important;opacity:1!important;transform:none!important}}
+        @media(prefers-reduced-motion:reduce){{
+          .rise,.bar,.heat,.pulse{{animation:none!important;opacity:1!important;transform:none!important}}
+        }}
       </style>
     </defs>
     """
 
+
 def start(width: int, height: int, grid: bool = False) -> str:
-    overlay = '<rect width="100%" height="100%" fill="url(#paper)"/>' if grid else ""
+    overlay = '<rect width="100%" height="100%" fill="url(#paper-grid)"/>' if grid else ""
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
-        f'viewBox="0 0 {width} {height}" role="img" class="{"static" if STATIC else ""}">{defs()}'
-        f'<rect width="{width}" height="{height}" rx="4" fill="{C["bg"]}" stroke="{C["line"]}"/>'
+        f'viewBox="0 0 {width} {height}" role="img" class="{"static" if STATIC else ""}">'
+        f'{defs()}<rect width="{width}" height="{height}" rx="5" fill="{C["paper"]}" stroke="{C["line"]}"/>'
         f'{overlay}'
     )
+
 
 def end(svg: str) -> str:
     return svg + "</svg>\n"
 
 
 def t(x, y, value, size=16, fill=None, weight=500, extra="") -> str:
-    return (f'<text x="{x}" y="{y}" font-size="{size}" fill="{fill or C["white"]}" '
+    return (f'<text x="{x}" y="{y}" font-size="{size}" fill="{fill or C["ink"]}" '
             f'font-weight="{weight}" {extra}>{escape(str(value))}</text>')
 
 
@@ -150,125 +169,171 @@ def save(name: str, svg: str) -> None:
     (CARD_DIR / name).write_text(end(svg), encoding="utf-8")
 
 
+def wrap_lines(value: str, max_chars: int, max_lines: int = 2) -> list[str]:
+    """Word-aware wrapping with an ellipsis when text exceeds the card."""
+    lines = textwrap.wrap(value.strip(), width=max_chars, break_long_words=False, break_on_hyphens=False)
+    if len(lines) > max_lines:
+        lines = lines[:max_lines]
+        last = lines[-1]
+        lines[-1] = last[:max(1, max_chars - 1)].rstrip() + "…"
+    return lines
+
+
 def draw_hero() -> None:
-    # Editorial hero: typography-led, with an abstract animated code motif instead of a borrowed portrait.
-    s = start(880, 420, True)
-    s += t(48, 55, "VANSH RALLY  /  CSE · THAPAR", 11, C["blue"], 750, 'letter-spacing="2"')
-    s += '<circle cx="54" cy="104" r="4" fill="#2f55ff"><animate attributeName="opacity" values="1;.25;1" dur="1.8s" repeatCount="indefinite"/></circle>'
-    s += '<text x="72" y="109" font-size="10" fill="#6e6e73" letter-spacing="1.4">BUILDING IN PUBLIC · LEARNING BY DOING</text>'
-    s += '<text x="44" y="222" font-family="Georgia,Times New Roman,serif" font-size="106" letter-spacing="-3" fill="#111111">Vansh</text>'
-    s += '<text x="44" y="318" font-family="Georgia,Times New Roman,serif" font-style="italic" font-size="106" letter-spacing="-3" fill="#2f55ff">Rally.</text>'
-    s += '<text x="48" y="362" font-size="17" fill="#3a3a3c">I build things for the web, explore systems,</text>'
-    s += '<text x="48" y="386" font-size="17" fill="#3a3a3c">and turn ideas into working projects.</text>'
-    # Abstract terminal / signal motif on the right.
-    s += '<g transform="translate(604 118)" fill="none" stroke="#111111" stroke-width="1.2" opacity=".9">'
-    s += '<rect x="0" y="0" width="220" height="170" rx="8" stroke="#dcdcd7"/>'
-    s += '<path d="M0 28H220" stroke="#dcdcd7"/><circle cx="16" cy="14" r="3" fill="#ef3b2d" stroke="none"/><circle cx="29" cy="14" r="3" fill="#ffc81a" stroke="none"/><circle cx="42" cy="14" r="3" fill="#2f55ff" stroke="none"/>'
-    s += '<path d="M24 58h35m-35 22h66m-66 22h45m-45 22h83" stroke="#2f55ff" stroke-linecap="round"/>'
-    s += '<path d="M132 56l22 22-22 22m30 0h28" stroke="#ef3b2d" stroke-linecap="round" stroke-linejoin="round"/>'
-    s += '<circle cx="176" cy="134" r="18" stroke="#ffc81a"><animate attributeName="r" values="12;26;12" dur="3.5s" repeatCount="indefinite"/></circle>'
+    s = start(880, 360, True)
+    # Left typography column.
+    s += t(48, 48, "VANSH RALLY   /   CSE · THAPAR", 10, C["cobalt"], 750, 'letter-spacing="1.8"')
+    s += '<circle cx="52" cy="83" r="3.5" fill="#315BEE"/>'
+    s += t(66, 87, "ENGINEERING IDEAS INTO USEFUL THINGS", 9, C["muted"], 650, 'letter-spacing="1.15"')
+    s += '<g class="rise">'
+    s += '<text x="43" y="194" class="serif" font-size="104" letter-spacing="-4" fill="#17191F">Vansh</text>'
+    s += '<text x="43" y="282" class="serif" font-size="104" font-style="italic" letter-spacing="-4" fill="#315BEE">Rally.</text>'
     s += '</g>'
-    s += '<path d="M48 402H832" stroke="#dcdcd7"/><circle cx="832" cy="402" r="4" fill="#2f55ff"/>'
+    s += t(50, 322, "CSE student · Developer · Curious builder", 13, C["muted"], 500)
+    # Abstract cobalt field: a modular orbital / circuit composition, not a stock illustration.
+    s += '<g transform="translate(570 48)">'
+    s += '<rect x="0" y="0" width="258" height="258" rx="4" fill="url(#cobalt-wash)" stroke="#D9D9D3"/>'
+    s += '<path d="M0 86H258M0 172H258M86 0V258M172 0V258" stroke="#315BEE" stroke-opacity=".13"/>'
+    s += '<circle cx="129" cy="129" r="88" fill="none" stroke="#315BEE" stroke-width="1.2" stroke-dasharray="2 6"/>'
+    s += '<circle cx="129" cy="129" r="59" fill="none" stroke="#315BEE" stroke-width="1.2"/>'
+    s += '<path d="M129 30V228M30 129H228M59 59L199 199M199 59L59 199" stroke="#315BEE" stroke-opacity=".26"/>'
+    s += '<path d="M129 45L155 104L213 129L155 154L129 213L103 154L45 129L103 104Z" fill="#315BEE" fill-opacity=".10" stroke="#315BEE" stroke-width="1.2"/>'
+    s += '<circle cx="129" cy="129" r="23" fill="#315BEE"/>'
+    s += '<circle cx="129" cy="129" r="7" fill="#FBFAF7"/>'
+    s += '<circle cx="129" cy="41" r="5" fill="#315BEE"><animate attributeName="r" values="4;7;4" dur="2.8s" repeatCount="indefinite"/></circle>'
+    s += '<circle cx="217" cy="129" r="4" fill="#315BEE"/>'
+    s += '<circle cx="41" cy="129" r="4" fill="#315BEE"/>'
+    s += '<path d="M18 18H40M18 18V40M240 18H218M240 18V40M18 240H40M18 240V218M240 240H218M240 240V218" stroke="#315BEE" stroke-width="2"/>'
+    s += '</g>'
+    s += '<path d="M48 343H832" stroke="#D9D9D3"/>'
+    s += t(48, 356, "01  /  PROFILE", 8, C["quiet"], 700, 'letter-spacing="1.3"')
+    s += t(832, 356, "BUILD · LEARN · CONTRIBUTE", 8, C["quiet"], 700, 'text-anchor="end" letter-spacing="1.3"')
     save("hero.svg", s)
 
-def draw_world_tile(filename: str, label: str, word: str, description: str, accent: str, delay: float) -> None:
-    s = start(293, 222, True)
-    s += f'<g class="enter" style="animation-delay:{delay}s">'
-    s += f'<rect x="8" y="8" width="277" height="198" rx="10" fill="{C["bg"]}" stroke="{C["line"]}"/>'
-    s += f'<rect x="8" y="8" width="277" height="5" rx="2" fill="{accent}"/>'
-    s += t(26, 42, label, 10, accent, 750, 'letter-spacing="1.8"')
-    s += f'<text x="24" y="112" font-family="Georgia,Times New Roman,serif" font-size="34" fill="{C["white"]}">{escape(word)}</text>'
-    lines = [description[i:i+34] for i in range(0, min(len(description), 68), 34)]
-    for i, line in enumerate(lines[:2]):
-        s += t(26, 151+i*19, line, 11, C["muted"], 500)
-    s += f'<path d="M26 180H266" stroke="{C["line"]}"/>'
-    s += t(266, 197, "↗", 15, accent, 700, 'text-anchor="end"')
+
+def draw_world_tile(filename: str, index: str, label: str, title: str,
+                    description: str, accent: str, delay: float) -> None:
+    s = start(293, 220, True)
+    s += f'<g class="rise" style="animation-delay:{delay}s">'
+    s += f'<rect x="8" y="8" width="277" height="204" rx="4" fill="{C["surface"]}" stroke="{C["line"]}"/>'
+    s += f'<rect x="8" y="8" width="4" height="204" fill="{accent}"/>'
+    s += t(26, 39, f"{index}  /  {label}", 9, accent, 750, 'letter-spacing="1.3"')
+    s += f'<text x="26" y="91" class="serif" font-size="29" fill="{C["ink"]}">{escape(title)}</text>'
+    for i, line in enumerate(wrap_lines(description, 34, 2)):
+        s += t(26, 126 + i*17, line, 10, C["muted"], 500)
+    s += f'<path d="M26 174H266" stroke="{C["line"]}"/>'
+    s += t(266, 195, "↗", 16, accent, 700, 'text-anchor="end"')
     s += '</g>'
     save(filename, s)
 
-
-def draw_social() -> None:
-    # Social links are intentionally plain text in README, matching the reference.
-    return
 
 def draw_activity(data: dict) -> None:
     placeholder = bool(data.get("placeholder", False))
-    s = start(880, 250, True)
-    s += t(48, 48, "GITHUB / ACTIVITY", 10, C["blue"], 750, 'letter-spacing="2"')
-    s += t(48, 91, "A year of showing up.", 38, C["white"], 400, 'class="serif"')
+    monthly = data.get("monthly", {})
+    entries = sorted(monthly.items())[-12:]
+    s = start(880, 240, True)
+    s += t(48, 42, "02  /  CONTRIBUTION RHYTHM", 9, C["cobalt"], 750, 'letter-spacing="1.6"')
+    s += '<text x="48" y="82" class="serif" font-size="30" fill="#17191F">Consistency, in context.</text>'
+    # Compact metric rail: no duplicate annual summary panel.
     stats = [
         ("CONTRIBUTIONS", "—" if placeholder else f'{data.get("total_contributions", 0):,}'),
         ("ACTIVE DAYS", "—" if placeholder else str(data.get("active_days", 0))),
-        ("CURRENT STREAK", "—" if placeholder else f'{data.get("current_streak", 0)} days'),
-        ("LONGEST STREAK", "—" if placeholder else f'{data.get("longest_streak", 0)} days')
+        ("CURRENT STREAK", "—" if placeholder else f'{data.get("current_streak", 0)}d'),
+        ("LONGEST STREAK", "—" if placeholder else f'{data.get("longest_streak", 0)}d')
     ]
     for i, (label, value) in enumerate(stats):
-        x = 48 + i * 196
-        s += f'<path d="M{x} 125 V220" stroke="{C["line"]}" stroke-width="1"/>'
-        s += t(x + 18, 151, label, 9, C["dim"], 750, 'letter-spacing="1.2"')
-        s += t(x + 18, 194, value, 30, C["white"], 650, 'class="serif"')
-    s += f'<path d="M48 220 H832" stroke="{C["line"]}" stroke-width="1"/>'
+        x = 48 + i*196
+        s += t(x, 112, label, 8, C["quiet"], 750, 'letter-spacing="1"')
+        s += f'<text x="{x}" y="145" class="serif" font-size="26" fill="{C["ink"]}">{escape(value)}</text>'
+        if i < 3:
+            s += f'<path d="M{x+170} 98V151" stroke="{C["line"]}"/>'
+    # Monthly bars, with peak highlighted in cobalt.
+    chart_x, chart_y, chart_w, chart_h = 48, 174, 784, 43
+    values = [int(v) for _, v in entries]
+    peak = max(values, default=0)
+    max_value = max(peak, 1)
+    slot = chart_w / max(len(entries), 1)
+    for i, (month, value) in enumerate(entries):
+        x = chart_x + i*slot
+        h = max(2, (int(value)/max_value)*(chart_h-10)) if entries else 2
+        color = C["cobalt"] if int(value) == peak and peak > 0 else C["cobalt_pale"]
+        s += f'<rect class="bar" style="animation-delay:{i*55}ms" x="{x+slot*.27:.1f}" y="{chart_y+chart_h-h:.1f}" width="{slot*.46:.1f}" height="{h:.1f}" rx="2" fill="{color}"/>'
+        label = date.fromisoformat(month + "-01").strftime("%b").upper()
+        s += t(x+slot/2, 231, label, 7, C["quiet"], 650, 'text-anchor="middle"')
+        if int(value) == peak and peak > 0:
+            s += t(x+slot/2, chart_y+chart_h-h-5, value, 8, C["cobalt"], 750, 'text-anchor="middle"')
     busy = data.get("busiest_day", {})
-    busy_text = "Busiest day: awaiting first data sync" if placeholder else f'BUSIEST DAY  /  {busy.get("date", "—")}  ·  {busy.get("count", 0)} CONTRIBUTIONS'
-    s += t(48, 239, busy_text, 9, C["muted"], 600, 'letter-spacing=".8"')
+    busy_text = "Busiest day · awaiting data sync" if placeholder else (
+        f'BEST DAY  {busy.get("date", "—")}  /  {busy.get("count", 0)} CONTRIBUTIONS'
+    )
+    s += t(832, 42, busy_text, 8, C["muted"], 650, 'text-anchor="end" letter-spacing=".45"')
     save("activity.svg", s)
 
-def project_card(filename: str, index: str, name: str, description: str,
-                 tags: str, motif: str) -> None:
-    s = start(293, 198, True)
-    accent = C["blue"] if index == "01" else (C["violet"] if index == "02" else C["green"])
-    s += f'<rect x="8" y="8" width="277" height="182" rx="3" fill="{C["bg"]}" stroke="{C["line"]}"/>'
-    s += f'<rect x="8" y="8" width="4" height="182" fill="{accent}"/>'
-    s += t(26, 39, "PROJECT  /  " + index, 9, C["dim"], 750, 'letter-spacing="1.5"')
-    s += t(26, 82, name, 22, C["white"], 750, 'letter-spacing="-.4"')
-    lines = [description[i:i+31] for i in range(0, min(len(description), 62), 31)]
-    for j, line in enumerate(lines[:2]):
-        s += t(26, 111 + j*16, line, 10, C["muted"], 500)
-    s += f'<path d="M26 155 H266" stroke="{C["line"]}" stroke-width="1"/>'
-    s += t(26, 176, tags, 8, accent, 700, 'letter-spacing=".4"')
-    s += t(266, 39, "↗", 17, accent, 650, 'text-anchor="end"')
-    save(filename, s)
 
 def draw_contributions(data: dict) -> None:
-    days = data.get("days", [])
-    today = date.today()
-    if len(days) < 350:
-        days = [{"date": (today - timedelta(days=364-i)).isoformat(), "contributionCount": 0} for i in range(365)]
-    days = days[-364:]
-    palette = ["#e5e5e1", "#c8d2ff", "#8fa4ff", "#536fff", "#2f55ff"]
-    s = start(880, 270, True)
-    s += t(48, 48, "CONTRIBUTION HISTORY", 10, C["blue"], 750, 'letter-spacing="2"')
-    s += t(48, 91, "Small steps. Compounded.", 38, C["white"], 400, 'class="serif"')
-    s += t(832, 45, "LAST 52 WEEKS", 9, C["dim"], 650, 'text-anchor="end" letter-spacing="1.4"')
-    start_x, start_y, step, cell = 48, 126, 16, 12
-    previous_month = None
-    for col in range(52):
-        first_day = days[col * 7] if col * 7 < len(days) else None
-        if first_day:
-            month = date.fromisoformat(first_day["date"]).strftime("%b")
-            if month != previous_month:
-                s += t(start_x + col * step, 115, month.upper(), 8, C["dim"], 600)
-                previous_month = month
-    for row in range(7):
-        for col in range(52):
-            item = days[col * 7 + row] if col * 7 + row < len(days) else None
-            if item is None:
+    raw_days = data.get("days", [])
+    if not raw_days:
+        raw_days = [{"date": (date.today()-timedelta(days=i)).isoformat(), "contributionCount": 0}
+                    for i in range(364, -1, -1)]
+    by_date = {date.fromisoformat(d["date"]): int(d["contributionCount"]) for d in raw_days}
+    today = max(by_date, default=date.today())
+    end_day = today
+    # Align columns to Sunday so rows consistently represent weekdays.
+    start_day = end_day - timedelta(days=363)
+    start_day -= timedelta(days=(start_day.weekday()+1) % 7)
+    columns = ((end_day-start_day).days // 7) + 1
+    columns = min(columns, 53)
+    palette = [C["surface_alt"], "#DCE4FF", "#AFC0FF", "#7893F7", "#315BEE"]
+    s = start(880, 190, True)
+    s += t(48, 40, "03  /  THE LAST 52 WEEKS", 9, C["cobalt"], 750, 'letter-spacing="1.6"')
+    s += '<text x="48" y="77" class="serif" font-size="29" fill="#17191F">A year of making things move.</text>'
+    s += t(832, 43, f'{data.get("total_contributions", 0):,} CONTRIBUTIONS', 8, C["muted"], 650, 'text-anchor="end" letter-spacing=".8"')
+    left, top, step, cell = 48, 98, 15, 11
+    for row, label in enumerate(["S", "M", "T", "W", "T", "F", "S"]):
+        s += t(35, top+row*step+9, label, 7, C["quiet"], 600, 'text-anchor="middle"')
+    prev_month = None
+    for col in range(columns):
+        d = start_day + timedelta(days=col*7)
+        if d.month != prev_month:
+            s += t(left+col*step, 92, d.strftime("%b").upper(), 7, C["quiet"], 650)
+            prev_month = d.month
+        for row in range(7):
+            current = d + timedelta(days=row)
+            if current > end_day:
                 continue
-            count = int(item["contributionCount"])
-            level = 0 if count == 0 else min(4, 1 + (count - 1) // 4)
-            x, y = start_x + col * step, start_y + row * step
-            s += f'<rect class="heat" style="animation-delay:{(row*52+col)*2}ms" x="{x}" y="{y}" width="{cell}" height="{cell}" rx="2" fill="{palette[level]}"><title>{escape(item["date"])} · {count} contributions</title></rect>'
-    s += t(48, 260, "LESS", 8, C["dim"], 600)
+            count = by_date.get(current, 0)
+            level = 0 if count == 0 else min(4, 1+(count-1)//4)
+            x, y = left+col*step, top+row*step
+            s += (f'<rect class="heat" style="animation-delay:{(col*7+row)*1.2:.1f}ms" '
+                  f'x="{x}" y="{y}" width="{cell}" height="{cell}" rx="2" fill="{palette[level]}">'
+                  f'<title>{current.isoformat()} · {count} contributions</title></rect>')
+    s += t(832, 180, "LESS", 7, C["quiet"], 600, 'text-anchor="end"')
     for i, color in enumerate(palette):
-        s += f'<rect x="{88+i*19}" y="249" width="12" height="12" rx="2" fill="{color}"/>'
-    s += t(194, 260, "MORE", 8, C["dim"], 600)
+        s += f'<rect x="{738+i*17}" y="171" width="11" height="11" rx="2" fill="{color}"/>'
     save("contributions.svg", s)
 
+
+def project_card(filename: str, index: str, name: str, description: str, tags: str) -> None:
+    s = start(293, 205, True)
+    s += f'<rect x="8" y="8" width="277" height="189" rx="4" fill="{C["surface"]}" stroke="{C["line"]}"/>'
+    s += f'<rect x="8" y="8" width="4" height="189" fill="{C["cobalt"]}"/>'
+    s += t(26, 38, f"SELECTED WORK  /  {index}", 8, C["quiet"], 750, 'letter-spacing="1.15"')
+    # Use a smaller title for long names to keep every card within its grid.
+    title_size = 19 if len(name) <= 15 else 15
+    s += t(26, 77, name, title_size, C["ink"], 750, 'letter-spacing="-.25"')
+    for i, line in enumerate(wrap_lines(description, 34, 2)):
+        s += t(26, 111+i*16, line, 10, C["muted"], 500)
+    s += f'<path d="M26 158H266" stroke="{C["line"]}"/>'
+    s += t(26, 180, tags, 7, C["cobalt"], 750, 'letter-spacing=".45"')
+    s += t(266, 38, "↗", 15, C["cobalt"], 700, 'text-anchor="end"')
+    save(filename, s)
+
+
 def draw_section_title() -> None:
-    s = start(880, 68)
-    s += t(48, 44, "WHAT I'M BUILDING", 13, C["white"], 750, 'letter-spacing="2.2"')
-    s += '<path d="M280 39 H832" stroke="#d8d8d2" stroke-width="1"/>'
-    s += '<circle cx="832" cy="39" r="3" fill="#2f55ff"/>'
+    s = start(880, 66)
+    s += t(48, 40, "04  /  SELECTED WORK", 10, C["cobalt"], 750, 'letter-spacing="1.8"')
+    s += '<path d="M246 35H832" stroke="#D9D9D3"/>'
+    s += '<circle cx="832" cy="35" r="3" fill="#315BEE"/>'
     save("title-coding.svg", s)
 
 
@@ -280,20 +345,26 @@ def main() -> None:
     data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
     draw_hero()
     draw_activity(data)
-    draw_world_tile("build.svg", "BUILD", "Web & systems", "React, JavaScript, Python and backend fundamentals.", C["blue"], 0.25)
-    draw_world_tile("learn.svg", "LEARN", "Always curious", "CSE at Thapar. Exploring AI, systems and open source.", C["green"], 0.45)
-    draw_world_tile("community.svg", "COMMUNITY", "Build together", "Hackathons, society work and first open-source PRs.", C["violet"], 0.65)
+    draw_contributions(data)
+    draw_world_tile("build.svg", "01", "BUILD", "Web & systems",
+                    "React interfaces, JavaScript and Python projects with a growing backend focus.",
+                    C["cobalt"], 0.12)
+    draw_world_tile("learn.svg", "02", "EXPLORE", "New ground",
+                    "AI and machine learning, systems thinking, and the foundations behind software.",
+                    C["ink"], 0.25)
+    draw_world_tile("community.svg", "03", "CONTRIBUTE", "Build together",
+                    "Hackathons, student communities, and learning through open-source work.",
+                    C["muted"], 0.38)
     draw_section_title()
     project_card("repo-codevibe.svg", "01", "CODEVIBE",
                  "A browser-based coding practice platform.",
-                 "HTML  /  CSS  /  JAVASCRIPT", "terminal")
+                 "HTML  /  CSS  /  JAVASCRIPT")
     project_card("repo-hack-helix.svg", "02", "HACK HELIX",
-                 "A hackathon project built through collaboration.",
-                 "HACKATHON  /  DEVELOPMENT", "nodes")
+                 "A collaborative hackathon build exploring a real-world problem.",
+                 "HACKATHON  /  PRODUCT BUILDING")
     project_card("repo-basketball-scorecard.svg", "03", "BASKETBALL SCORECARD",
-                 "A focused scoring interface for the game.",
-                 "FRONTEND  /  JAVASCRIPT", "score")
-    draw_contributions(data)
+                 "A focused scoring interface for tracking the game.",
+                 "FRONTEND  /  JAVASCRIPT")
 
 
 if __name__ == "__main__":
