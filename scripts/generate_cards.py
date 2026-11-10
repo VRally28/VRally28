@@ -5,6 +5,9 @@ from __future__ import annotations
 import base64
 import json
 import os
+import subprocess
+import sys
+import tempfile
 import urllib.request
 from collections import Counter
 from datetime import date, datetime, timedelta, timezone
@@ -122,22 +125,15 @@ def delay(seconds: float) -> str:
 
 def hero() -> None:
     smil = "" if STATIC else '<animateTransform attributeName="gradientTransform" type="translate" values="-600 0;600 0;600 0" keyTimes="0;.45;1" dur="7s" begin="1.6s" repeatCount="indefinite"/>'
-    portrait = ""
-    for candidate in (ROOT / "assets" / "portrait.png", ROOT / "assets" / "portrait.jpg", ROOT / "assets" / "portrait.webp"):
-        if candidate.exists():
-            mime = {".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp"}[candidate.suffix]
-            encoded = base64.b64encode(candidate.read_bytes()).decode("ascii")
-            portrait = f'<defs><clipPath id="portrait"><circle cx="705" cy="191" r="115"/></clipPath></defs><image href="data:{mime};base64,{encoded}" x="590" y="76" width="230" height="230" preserveAspectRatio="xMidYMid slice" clip-path="url(#portrait)"/><circle cx="705" cy="191" r="115" fill="none" stroke="{BLUE}" stroke-width="2"/>'
-            break
-    graphic = f'''<g transform="translate(590 76)"><rect width="230" height="230" rx="14" fill="#e7eaff"/>
-      <circle cx="115" cy="115" r="82" fill="none" stroke="{BLUE}" stroke-opacity=".2"/>
-      <circle cx="115" cy="115" r="59" fill="none" stroke="{BLUE}" stroke-opacity=".42" stroke-width="1.5" stroke-dasharray="3 6"/>
-      <path d="M115 20V210M20 115H210M48 48L182 182M182 48L48 182" stroke="{BLUE}" stroke-opacity=".25"/>
-      <path d="M115 40L140 90L190 115L140 140L115 190L90 140L40 115L90 90Z" fill="{BLUE}" fill-opacity=".12" stroke="{BLUE}"/>
-      <circle cx="115" cy="115" r="20" fill="{BLUE}"/><circle cx="115" cy="115" r="6" fill="#fff"/>
-      {'' if STATIC else f'<circle cx="115" cy="35" r="5" fill="{BLUE}"><animate attributeName="r" values="4;7;4" dur="2.8s" repeatCount="indefinite"/></circle>'}
-      </g>'''
-    graphic = portrait or graphic
+    portrait_file = OUT / "portrait-ascii.svg"
+    if not portrait_file.exists():
+        raise FileNotFoundError("Run scripts/make_ascii_svg.py before rendering the hero card.")
+    portrait_svg = portrait_file.read_text(encoding="utf-8")
+    root_end = portrait_svg.find(">")
+    close = portrait_svg.rfind("</svg>")
+    if root_end < 0 or close < root_end:
+        raise ValueError("cards/portrait-ascii.svg is not a valid SVG document.")
+    graphic = f'<g transform="translate(570 38) scale(.34)">{portrait_svg[root_end+1:close]}</g>'
     body = f'''<defs><linearGradient id="shine" x1="0" x2="1"><stop offset="0" stop-color="{INK}"/><stop offset=".5" stop-color="{INK}"/><stop offset=".56" stop-color="{BLUE}"/><stop offset=".62" stop-color="{INK}"/><stop offset="1" stop-color="{INK}"/>{smil}</linearGradient></defs>
     <rect width="880" height="420" rx="14" fill="{PAPER}"/>
     <g class="f" {delay(0)}><rect class="live" x="48" y="49" width="8" height="8" rx="2" fill="{BLUE}"/>{text(66,57,"CSE STUDENT · THAPAR INSTITUTE",12,MUTED,"monospace",'letter-spacing="1"')}</g>
@@ -159,8 +155,8 @@ def heatmap(data: dict) -> None:
     cols = min(53, (end-start).days // 7 + 1)
     x0, y0, step, cell = 44, 93, 15, 12
     out = [f'<rect width="880" height="205" rx="14" fill="{PAPER}"/>',
-           f'<text class="r serif" {delay(1.5)} x="42" y="57" font-size="34" fill="{INK}">Every day, <tspan font-style="italic" fill="{BLUE}">in blue</tspan></text>',
-           f'<text class="f" {delay(1.5)} x="836" y="54" text-anchor="end" font-size="11" letter-spacing="1" fill="{MUTED}" font-family="monospace">REFRESHED DAILY</text>']
+           f'<text class="r serif" {delay(6.35)} x="42" y="57" font-size="34" fill="{INK}">Every day, <tspan font-style="italic" fill="{BLUE}">in blue</tspan></text>',
+           f'<text class="f" {delay(6.35)} x="836" y="54" text-anchor="end" font-size="11" letter-spacing="1" fill="{MUTED}" font-family="monospace">REFRESHED DAILY</text>']
     previous = None
     for col in range(cols):
         sunday = start + timedelta(days=col*7)
@@ -172,7 +168,7 @@ def heatmap(data: dict) -> None:
             if d > end: continue
             count = day_counts.get(d, 0)
             level = 0 if count == 0 else min(5, 1 + (count-1)//5)
-            out.append(f'<rect class="p" {delay(1.7+col*.012+row*.008)} x="{x0+col*step}" y="{y0+row*step}" width="{cell}" height="{cell}" rx="3" fill="{PALETTE[level]}"><title>{d.isoformat()}: {count} contributions</title></rect>')
+            out.append(f'<rect class="p" {delay(6.55+col*.012+row*.008)} x="{x0+col*step}" y="{y0+row*step}" width="{cell}" height="{cell}" rx="3" fill="{PALETTE[level]}"><title>{d.isoformat()}: {count} contributions</title></rect>')
     out.append(text(44, 197, "LESS", 9, MUTED, "monospace"))
     for i, color in enumerate(PALETTE): out.append(f'<rect x="{702+i*16}" y="185" width="11" height="11" rx="3" fill="{color}"/>')
     out.append(text(806, 197, "MORE", 9, MUTED, "monospace"))
@@ -184,20 +180,20 @@ def activity(data: dict) -> None:
     maxval = max([int(v) for _, v in months] or [1])
     x0, base, chart_h, bw, gap = 40, 287, 145, 36, 11
     out = [f'<rect width="880" height="340" rx="14" fill="{PAPER}"/>',
-           f'<text class="f" {delay(3.45)} x="40" y="54" font-size="11" letter-spacing="1" fill="{MUTED}" font-family="monospace">THE LAST 12 MONTHS ON GITHUB</text>',
-           f'<text class="r serif" {delay(3.55)} x="38" y="111" font-size="49" fill="{INK}">{int(data.get("total_contributions",0)):,} <tspan font-style="italic">contributions</tspan></text>']
+           f'<text class="f" {delay(7.55)} x="40" y="54" font-size="11" letter-spacing="1" fill="{MUTED}" font-family="monospace">THE LAST 12 MONTHS ON GITHUB</text>',
+           f'<text class="r serif" {delay(7.65)} x="38" y="111" font-size="49" fill="{INK}">{int(data.get("total_contributions",0)):,} <tspan font-style="italic">contributions</tspan></text>']
     best = max(months, key=lambda item: int(item[1]), default=("",0))
     for i, (month, value) in enumerate(months):
         h = max(4, round(int(value)/maxval*chart_h))
         x = x0+i*(bw+gap)
         color = BLUE if (month,value)==best else ("#c9c9c4" if i==len(months)-1 else INK)
-        out.append(f'<rect class="g" {delay(3.75+i*.055)} x="{x}" y="{base-h}" width="{bw}" height="{h}" rx="4" fill="{color}"><title>{month}: {int(value):,}</title></rect>')
+        out.append(f'<rect class="g" {delay(7.85+i*.055)} x="{x}" y="{base-h}" width="{bw}" height="{h}" rx="4" fill="{color}"><title>{month}: {int(value):,}</title></rect>')
         out.append(text(x+bw/2, base+21, date.fromisoformat(month+"-01").strftime("%b"), 9, MUTED, "monospace",'text-anchor="middle"'))
     busy=data.get("busiest_day", {})
     metrics=[(f'{data.get("current_streak",0)} days',"current streak"),(str(data.get("active_days",0)),"active days"),(str(busy.get("count",0)),"on the busiest day")]
     for i,(big,small) in enumerate(metrics):
         y=105+i*82
-        out.append(f'<g class="r" {delay(3.7+i*.15)}>{text(650,y,big,34,INK,"Georgia,serif")}{text(650,y+24,small,13,MUTED)}</g>')
+        out.append(f'<g class="r" {delay(7.8+i*.15)}>{text(650,y,big,34,INK,"Georgia,serif")}{text(650,y+24,small,13,MUTED)}</g>')
         if i<2: out.append(f'<line x1="650" y1="{y+43}" x2="836" y2="{y+43}" stroke="#d8d8d4"/>')
     out.append(text(650, 339-6, f'BUSIEST DAY  {busy.get("date","—")}', 9, MUTED, "monospace"))
     write("activity.svg", 880, 340, "".join(out), f'{int(data.get("total_contributions",0)):,} contributions, {data.get("current_streak",0)} day streak, {data.get("active_days",0)} active days.')
@@ -226,17 +222,21 @@ def main() -> None:
     if os.getenv("GH_TOKEN"): refresh_data()
     if not DATA.exists(): raise FileNotFoundError("Missing data/contributions.json; refresh contribution data first.")
     data=json.loads(DATA.read_text(encoding="utf-8"))
+    with tempfile.TemporaryDirectory(prefix="profile-cards-") as temp:
+        prepared = Path(temp) / "portrait-prepped.png"
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "prep_photo.py"), str(ROOT / "assets" / "portrait.png"), str(prepared)], check=True)
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "make_ascii_svg.py"), str(prepared), str(OUT / "portrait-ascii.svg")], check=True)
     hero()
     heatmap(data)
     activity(data)
-    tile("build.svg","BUILD","Web & systems","Ideas shaped into useful tools.",BLUE,"#fff",5.75)
-    tile("learn.svg","EXPLORE","New ground","AI, software and what comes next.",RED,"#fff",6.0)
-    tile("community.svg","CONTRIBUTE","Build together","Hackathons, community and open source.",GOLD,INK,6.25)
-    title=f'<rect width="880" height="64" fill="transparent"/><text class="r serif" {delay(7.7)} x="2" y="46" font-size="34" fill="{INK}">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
+    tile("build.svg","BUILD","Web & systems","Ideas shaped into useful tools.",BLUE,"#fff",9.1)
+    tile("learn.svg","EXPLORE","New ground","AI, software and what comes next.",RED,"#fff",9.35)
+    tile("community.svg","CONTRIBUTE","Build together","Hackathons, community and open source.",GOLD,INK,9.6)
+    title=f'<rect width="880" height="64" fill="transparent"/><text class="r serif" {delay(11.1)} x="2" y="46" font-size="34" fill="{INK}">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
     write("title-coding.svg",880,64,title,"A few things I've built")
-    repo_card("repo-codevibe.svg","CODEVIBE","A browser-based coding practice platform.|Built for learning by doing.","HTML · CSS · JAVASCRIPT",BLUE,8.0)
-    repo_card("repo-hack-helix.svg","HACK HELIX","A collaborative hackathon project.|Made with a team, around a real problem.","HACKATHON · PRODUCT",RED,8.15)
-    repo_card("repo-basketball-scorecard.svg","BASKETBALL SCORECARD","A focused frontend for tracking|the score and rhythm of a game.","FRONTEND · JAVASCRIPT",GOLD,8.3)
+    repo_card("repo-codevibe.svg","CODEVIBE","A browser-based coding practice platform.|Built for learning by doing.","HTML · CSS · JAVASCRIPT",BLUE,11.5)
+    repo_card("repo-hack-helix.svg","HACK HELIX","A collaborative hackathon project.|Made with a team, around a real problem.","HACKATHON · PRODUCT",RED,11.65)
+    repo_card("repo-basketball-scorecard.svg","BASKETBALL SCORECARD","A focused frontend for tracking|the score and rhythm of a game.","FRONTEND · JAVASCRIPT",GOLD,11.8)
 
 
 if __name__ == "__main__":
