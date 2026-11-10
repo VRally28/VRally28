@@ -66,7 +66,9 @@ def fetch_contributions() -> None:
     for day in days:
         streak = streak + 1 if int(day["contributionCount"]) else 0
         longest_streak = max(longest_streak, streak)
-    monthly = Counter()\n    for day in days:\n        monthly[day["date"][:7]] += int(day["contributionCount"])
+    monthly = Counter()
+    for day in days:
+        monthly[day["date"][:7]] += int(day["contributionCount"])
     months = []
     month_cursor = start.replace(day=1)
     for _ in range(13):
