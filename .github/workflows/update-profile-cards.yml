@@ -1,0 +1,50 @@
+name: Update animated profile cards
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-cards
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out profile repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install font tooling
+        run: |
+          python -m pip install --upgrade pip fonttools brotli
+      - name: Download and subset Inter
+        run: |
+          mkdir -p assets
+          curl -L --fail --silent --show-error \
+            "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/Inter%5Bwght%5D.ttf" \
+            -o /tmp/Inter.ttf
+          python -m fontTools.subset /tmp/Inter.ttf \
+            --output-file=assets/Inter-subset.woff2 \
+            --flavor=woff2 --text="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 •·↗◎—"
+      - name: Generate contribution data and SVG cards
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_USER: VRally28
+        run: python scripts/generate_cards.py
+      - name: Commit generated cards and data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add cards data/contributions.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: refresh animated profile cards"
+            git push
+          fi
