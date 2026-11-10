@@ -232,7 +232,7 @@ def main() -> None:
     tile("build.svg","BUILD","Web & systems","Ideas shaped into useful tools.",BLUE,"#fff",9.1)
     tile("learn.svg","EXPLORE","New ground","AI, software and what comes next.",RED,"#fff",9.35)
     tile("community.svg","CONTRIBUTE","Build together","Hackathons, community and open source.",GOLD,INK,9.6)
-    title=f'<rect width="880" height="64" fill="transparent"/><text class="r serif" {delay(11.1)} x="2" y="46" font-size="34" fill="{INK}">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
+    title=f'<rect width="880" height="64" fill="{INK}"/><text class="r serif" {delay(11.1)} x="42" y="46" font-size="34" fill="#fff">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
     write("title-coding.svg",880,64,title,"A few things I've built")
     repo_card("repo-codevibe.svg","CODEVIBE","A browser-based coding practice platform.|Built for learning by doing.","HTML · CSS · JAVASCRIPT",BLUE,11.5)
     repo_card("repo-hack-helix.svg","HACK HELIX","A collaborative hackathon project.|Made with a team, around a real problem.","HACKATHON · PRODUCT",RED,11.65)
