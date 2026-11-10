@@ -317,6 +317,15 @@ def draw_contributions(data: dict) -> None:
     s += t(36, 157, "WED", 8, C["dim"], 650)
     s += t(36, 197, "FRI", 8, C["dim"], 650)
     start_x, start_y, step, cell = 86, 87, 20, 13
+    # Month labels sit just above the grid at the first week of each month.
+    previous_month = None
+    for col in range(52):
+        first_day = days[col * 7] if col * 7 < len(days) else None
+        if first_day:
+            month = date.fromisoformat(first_day["date"]).strftime("%b")
+            if month != previous_month:
+                s += t(start_x + col * step, 83, month.upper(), 8, C["dim"], 650)
+                previous_month = month
     # Draw in row-major order so the reveal cascades from top to bottom.
     for row in range(7):
         for col in range(52):
