@@ -311,14 +311,14 @@ def draw_contributions(data: dict) -> None:
     days = days[-364:]
     day_map = {item["date"]: int(item["contributionCount"]) for item in days}
     palette = ["#17253A", "#173D58", "#17628A", "#248CB5", "#45C9F5"]
-    s = start(1200, 236, True)
+    s = start(1200, 260, True)
     s += t(36, 43, "THE CONTRIBUTION GRID", 11, C["blue"], 800, 'letter-spacing="2.4"')
     s += t(36, 72, "Small steps. Compounded.", 25, C["white"], 750)
     s += t(1160, 17, "LAST 52 WEEKS", 9, C["dim"], 750, 'text-anchor="end" letter-spacing="1.5"')
-    s += t(36, 117, "MON", 8, C["dim"], 650)
-    s += t(36, 157, "WED", 8, C["dim"], 650)
-    s += t(36, 197, "FRI", 8, C["dim"], 650)
-    start_x, start_y, step, cell = 86, 89, 20, 16
+    s += t(36, 138, "MON", 8, C["dim"], 650)
+    s += t(36, 178, "WED", 8, C["dim"], 650)
+    s += t(36, 218, "FRI", 8, C["dim"], 650)
+    start_x, start_y, step, cell = 86, 110, 20, 16
     # Month labels sit just above the grid at the first week of each month.
     previous_month = None
     for col in range(52):
@@ -326,7 +326,7 @@ def draw_contributions(data: dict) -> None:
         if first_day:
             month = date.fromisoformat(first_day["date"]).strftime("%b")
             if month != previous_month:
-                s += t(start_x + col * step, 83, month.upper(), 8, C["dim"], 650)
+                s += t(start_x + col * step, 103, month.upper(), 8, C["dim"], 650)
                 previous_month = month
     # Draw in row-major order so the reveal cascades from top to bottom.
     for row in range(7):
