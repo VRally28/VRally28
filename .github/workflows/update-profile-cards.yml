@@ -1,6 +1,16 @@
 name: Refresh profile visuals
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "README.md"
+      - "cards/**"
+      - "data/**"
+      - "scripts/**"
+      - "assets/**"
+      - ".github/workflows/update-profile-cards.yml"
   schedule:
     - cron: "17 2 * * *"
   workflow_dispatch:
