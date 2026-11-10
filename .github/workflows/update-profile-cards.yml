@@ -46,6 +46,29 @@ jobs:
             --flavor=woff2 \
             --unicodes="U+0020-007E,U+00B7,U+2022,U+2197,U+2192,U+25CE,U+2014"
 
+      - name: Download and subset Instrument Serif
+        run: |
+          curl -L --fail --silent --show-error \
+            "https://raw.githubusercontent.com/google/fonts/main/ofl/instrumentserif/InstrumentSerif-Regular.ttf" \
+            -o /tmp/InstrumentSerif-Regular.ttf
+          curl -L --fail --silent --show-error \
+            "https://raw.githubusercontent.com/google/fonts/main/ofl/instrumentserif/InstrumentSerif-Italic.ttf" \
+            -o /tmp/InstrumentSerif-Italic.ttf
+          python -m fontTools.subset /tmp/InstrumentSerif-Regular.ttf \
+            --output-file=assets/InstrumentSerif-Regular-subset.woff2 \
+            --flavor=woff2 \
+            --unicodes="U+0020-007E"
+          python -m fontTools.subset /tmp/InstrumentSerif-Italic.ttf \
+            --output-file=assets/InstrumentSerif-Italic-subset.woff2 \
+            --flavor=woff2 \
+            --unicodes="U+0020-007E"
+          curl -L --fail --silent --show-error \
+            "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/OFL.txt" \
+            -o assets/Inter-OFL.txt
+          curl -L --fail --silent --show-error \
+            "https://raw.githubusercontent.com/google/fonts/main/ofl/instrumentserif/OFL.txt" \
+            -o assets/InstrumentSerif-OFL.txt
+
       - name: Fetch contribution data and render SVGs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,7 +79,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add cards data/contributions.json
+          git add cards data/contributions.json assets/*-OFL.txt
           if ! git diff --cached --quiet; then
             git commit -m "chore: refresh profile visuals"
             git push

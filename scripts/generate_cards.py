@@ -17,6 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "contributions.json"
 OUT = ROOT / "cards"
 FONT = ROOT / "assets" / "Inter-subset.woff2"
+SERIF = ROOT / "assets" / "InstrumentSerif-Regular-subset.woff2"
+SERIF_ITALIC = ROOT / "assets" / "InstrumentSerif-Italic-subset.woff2"
 STATIC = os.getenv("STATIC") == "1"
 USER = os.getenv("GH_USER", "VRally28")
 W = 880
@@ -95,16 +97,18 @@ def refresh_data() -> None:
 
 
 def font_face() -> str:
-    if not FONT.exists():
-        return ""
-    encoded = base64.b64encode(FONT.read_bytes()).decode("ascii")
-    return f"@font-face{{font-family:Inter;src:url(data:font/woff2;base64,{encoded}) format('woff2');font-weight:100 900}}"
+    faces = []
+    for path, family, style in ((FONT, "Inter", "normal"), (SERIF, "InstrumentSerif", "normal"), (SERIF_ITALIC, "InstrumentSerif", "italic")):
+        if path.exists():
+            encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+            faces.append(f"@font-face{{font-family:{family};src:url(data:font/woff2;base64,{encoded}) format('woff2');font-style:{style};font-weight:400}}")
+    return "".join(faces)
 
 
 def svg(width: int, height: int, body: str, label: str) -> str:
     static = "static" if STATIC else ""
     body = "\n".join(line.rstrip() for line in body.splitlines())
-    style = font_face() + CSS + "text{font-family:Inter,Arial,sans-serif}.serif{font-family:Georgia,'Times New Roman',serif}"
+    style = font_face() + CSS + "text{font-family:Inter,Arial,sans-serif}.serif{font-family:Georgia,'Times New Roman',serif}.name{font-family:InstrumentSerif,Georgia,serif}"
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" '
             f'role="img" aria-label="{escape(label)}" class="{static}"><title>{escape(label)}</title><style>{style}</style>{body}</svg>\n')
 
@@ -129,18 +133,18 @@ def hero() -> None:
     optimized = BytesIO()
     portrait.save(optimized, format="JPEG", quality=90, optimize=True)
     encoded = base64.b64encode(optimized.getvalue()).decode("ascii")
-    graphic = f'''<defs><clipPath id="portrait-circle"><circle cx="615" cy="205" r="140"/></clipPath></defs>
-    <g class="f" {delay(.45)}><circle cx="615" cy="205" r="150" fill="#e7eaff"/>
-    <circle cx="615" cy="205" r="148" fill="none" stroke="{BLUE}" stroke-opacity=".22" stroke-width="1"/>
-    <image href="data:image/jpeg;base64,{encoded}" x="475" y="65" width="280" height="280" preserveAspectRatio="xMidYMid slice" clip-path="url(#portrait-circle)"/>
-    <circle cx="615" cy="205" r="140" fill="none" stroke="{BLUE}" stroke-width="2"/></g>'''
+    graphic = f'''<defs><clipPath id="portrait-circle"><circle cx="575" cy="195" r="150"/></clipPath></defs>
+    <g class="f" {delay(.45)}><circle cx="575" cy="195" r="160" fill="#e7eaff"/>
+    <circle cx="575" cy="195" r="158" fill="none" stroke="{BLUE}" stroke-opacity=".22" stroke-width="1"/>
+    <image href="data:image/jpeg;base64,{encoded}" x="425" y="45" width="300" height="300" preserveAspectRatio="xMidYMid slice" clip-path="url(#portrait-circle)"/>
+    <circle cx="575" cy="195" r="150" fill="none" stroke="{BLUE}" stroke-width="2"/></g>'''
     body = f'''<rect width="880" height="420" rx="14" fill="{PAPER}"/>
     <g class="f" {delay(0)}><rect class="live" x="48" y="49" width="8" height="8" rx="2" fill="{BLUE}"/>{text(66,57,"CSE STUDENT · THAPAR INSTITUTE",12,MUTED,"monospace",'letter-spacing="1"')}</g>
-    <text class="r serif" {delay(.15)} x="44" y="190" font-size="112" letter-spacing="-3" fill="{INK}">Vansh</text>
-    <text class="r serif" {delay(.3)} x="44" y="290" font-style="italic" font-size="112" letter-spacing="-3" fill="{INK}">Rally</text>
+    <text class="r name" {delay(.15)} x="44" y="174" font-size="72" letter-spacing="-1" fill="{INK}">Vansh</text>
+    <text class="r name" {delay(.3)} x="44" y="256" font-style="italic" font-size="72" letter-spacing="-1" fill="{INK}">Rally</text>
     <g class="r" {delay(.55)}>{text(48,351,"I build useful things on the web and learn by making.",18,SOFT)}</g>
     <g class="f" {delay(.8)}>{text(48,402,"BUILD · EXPLORE · CONTRIBUTE",12,MUTED,"monospace",'letter-spacing=".8"')}</g>{graphic}'''
-    write("hero-photo-v2.svg", 880, 420, body, "Vansh Rally — CSE student and developer building useful things on the web.")
+    write("hero-photo-v4.svg", 880, 420, body, "Vansh Rally — CSE student and developer building useful things on the web.")
 
 
 def heatmap(data: dict) -> None:
