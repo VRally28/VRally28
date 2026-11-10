@@ -209,11 +209,11 @@ def draw_contributions(data: dict) -> None:
         days = [{"date": (today - timedelta(days=364-i)).isoformat(), "contributionCount": 0} for i in range(365)]
     days = days[-364:]
     palette = ["#e5e5e1", "#c8d2ff", "#8fa4ff", "#536fff", "#2f55ff"]
-    s = start(1200, 250, True)
+    s = start(1200, 270, True)
     s += t(48, 48, "CONTRIBUTION HISTORY", 10, C["blue"], 750, 'letter-spacing="2"')
     s += t(48, 91, "Small steps. Compounded.", 38, C["white"], 400, 'class="serif"')
     s += t(1152, 45, "LAST 52 WEEKS", 9, C["dim"], 650, 'text-anchor="end" letter-spacing="1.4"')
-    start_x, start_y, step, cell = 48, 122, 20, 14
+    start_x, start_y, step, cell = 48, 126, 16, 12
     previous_month = None
     for col in range(52):
         first_day = days[col * 7] if col * 7 < len(days) else None
@@ -231,11 +231,19 @@ def draw_contributions(data: dict) -> None:
             level = 0 if count == 0 else min(4, 1 + (count - 1) // 4)
             x, y = start_x + col * step, start_y + row * step
             s += f'<rect class="heat" style="animation-delay:{(row*52+col)*2}ms" x="{x}" y="{y}" width="{cell}" height="{cell}" rx="2" fill="{palette[level]}"><title>{escape(item["date"])} · {count} contributions</title></rect>'
-    s += t(48, 264, "LESS", 8, C["dim"], 600)
+    s += t(48, 260, "LESS", 8, C["dim"], 600)
     for i, color in enumerate(palette):
-        s += f'<rect x="{88+i*19}" y="253" width="12" height="12" rx="2" fill="{color}"/>'
-    s += t(194, 264, "MORE", 8, C["dim"], 600)
+        s += f'<rect x="{88+i*19}" y="249" width="12" height="12" rx="2" fill="{color}"/>'
+    s += t(194, 260, "MORE", 8, C["dim"], 600)
     save("contributions.svg", s)
+
+def draw_section_title() -> None:
+    s = start(1200, 68)
+    s += t(48, 44, "WHAT I'M BUILDING", 13, C["white"], 750, 'letter-spacing="2.2"')
+    s += '<path d="M280 39 H1152" stroke="#d8d8d2" stroke-width="1"/>'
+    s += '<circle cx="1152" cy="39" r="3" fill="#2f55ff"/>'
+    save("title-coding.svg", s)
+
 
 def main() -> None:
     if os.getenv("GH_TOKEN"):
@@ -246,6 +254,7 @@ def main() -> None:
     draw_hero()
     draw_social()
     draw_activity(data)
+    draw_section_title()
     project_card("repo-codevibe.svg", "01", "CODEVIBE",
                  "A browser-based coding practice platform.",
                  "HTML  /  CSS  /  JAVASCRIPT", "terminal")
