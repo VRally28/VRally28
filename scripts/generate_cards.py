@@ -124,7 +124,6 @@ def delay(seconds: float) -> str:
 
 
 def hero() -> None:
-    smil = "" if STATIC else '<animateTransform attributeName="gradientTransform" type="translate" values="-600 0;600 0;600 0" keyTimes="0;.45;1" dur="7s" begin="1.6s" repeatCount="indefinite"/>'
     portrait_file = OUT / "portrait-ascii.svg"
     if not portrait_file.exists():
         raise FileNotFoundError("Run scripts/make_ascii_svg.py before rendering the hero card.")
@@ -133,12 +132,11 @@ def hero() -> None:
     close = portrait_svg.rfind("</svg>")
     if root_end < 0 or close < root_end:
         raise ValueError("cards/portrait-ascii.svg is not a valid SVG document.")
-    graphic = f'<g transform="translate(490 18) scale(.43)">{portrait_svg[root_end+1:close]}</g>'
-    body = f'''<defs><linearGradient id="shine" x1="0" x2="1"><stop offset="0" stop-color="{INK}"/><stop offset=".5" stop-color="{INK}"/><stop offset=".56" stop-color="{BLUE}"/><stop offset=".62" stop-color="{INK}"/><stop offset="1" stop-color="{INK}"/>{smil}</linearGradient></defs>
-    <rect width="880" height="420" rx="14" fill="{PAPER}"/>
+    graphic = f'<g transform="translate(525 42) scale(.39)">{portrait_svg[root_end+1:close]}</g>'
+    body = f'''<rect width="880" height="420" rx="14" fill="{PAPER}"/>
     <g class="f" {delay(0)}><rect class="live" x="48" y="49" width="8" height="8" rx="2" fill="{BLUE}"/>{text(66,57,"CSE STUDENT · THAPAR INSTITUTE",12,MUTED,"monospace",'letter-spacing="1"')}</g>
     <text class="r serif" {delay(.15)} x="44" y="190" font-size="112" letter-spacing="-3" fill="{INK}">Vansh</text>
-    <text class="r serif" {delay(.3)} x="44" y="290" font-style="italic" font-size="112" letter-spacing="-3" fill="url(#shine)">Rally</text>
+    <text class="r serif" {delay(.3)} x="44" y="290" font-style="italic" font-size="112" letter-spacing="-3" fill="{INK}">Rally</text>
     <g class="r" {delay(.55)}>{text(48,351,"I build useful things on the web and learn by making.",18,SOFT)}</g>
     <g class="f" {delay(.8)}>{text(48,402,"BUILD · EXPLORE · CONTRIBUTE",12,MUTED,"monospace",'letter-spacing=".8"')}</g>{graphic}'''
     write("hero.svg", 880, 420, body, "Vansh Rally — CSE student and developer building useful things on the web.")
