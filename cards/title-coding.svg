@@ -13,4 +13,4 @@
 .live{animation:pulse 1.6s ease-in-out infinite}
 @media(prefers-reduced-motion:reduce){.r,.f,.g,.p,.tile,.live{animation:none!important;opacity:1!important;transform:none!important}animate,animateTransform{display:none!important}}
 .static .r,.static .f,.static .g,.static .p,.static .tile,.static .live{animation:none!important;opacity:1!important;transform:none!important}
-text{font-family:Inter,Arial,sans-serif}.serif{font-family:Georgia,'Times New Roman',serif}</style><rect width="880" height="64" fill="transparent"/><text class="r serif" style="animation-delay:11.10s" x="2" y="46" font-size="34" fill="#111111">A few things <tspan font-style="italic">I've built</tspan></text></svg>
+text{font-family:Inter,Arial,sans-serif}.serif{font-family:Georgia,'Times New Roman',serif}</style><rect width="880" height="64" fill="#111111"/><text class="r serif" style="animation-delay:11.10s" x="42" y="46" font-size="34" fill="#fff">A few things <tspan font-style="italic">I've built</tspan></text></svg>
