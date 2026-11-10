@@ -134,6 +134,7 @@ def defs() -> str:
         @keyframes trace{{to{{stroke-dashoffset:0}}}}
         @keyframes barIn{{from{{transform:scaleY(.05);opacity:.3}}to{{transform:scaleY(1);opacity:1}}}}
         @keyframes heatIn{{from{{opacity:.15;transform:scale(.55)}}to{{opacity:1;transform:scale(1)}}}}
+        .static *{{animation:none!important;opacity:1;transform:none;stroke-dashoffset:0}}
         @media(prefers-reduced-motion:reduce){{.enter,.glow,.dash,.bar,.heat{{animation:none!important;opacity:1;transform:none;stroke-dashoffset:0}}}}
       </style>
     </defs>
@@ -144,7 +145,7 @@ def start(width: int, height: int, grid: bool = False) -> str:
     overlay = '<rect width="100%" height="100%" rx="26" fill="url(#grid)"/>' if grid else ""
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
-        f'viewBox="0 0 {width} {height}" role="img">{defs()}'
+        f'viewBox="0 0 {width} {height}" role="img" class="{"static" if STATIC else ""}">{defs()}'
         f'<rect width="{width}" height="{height}" rx="26" fill="url(#surface)" stroke="{C["line"]}"/>'
         f'{overlay}'
     )
@@ -191,7 +192,7 @@ def draw_hero() -> None:
     s += t(777,293,"FULL-STACK",10,"#B8B0FF",750,'text-anchor="middle" letter-spacing="1.2"')
     s += t(1144,48,"01 / PROFILE",10,C["dim"],700,'text-anchor="end" letter-spacing="2"')
     s += '<path d="M328 326 H1144" stroke="url(#edge)" stroke-opacity=".7" stroke-width="2" class="dash"/>'
-    s += '<circle cx="1144" cy="326" r="4" fill="#67E8F9" class="glow"/>'
+    s += '<circle cx="1144" cy="326" r="4" fill="#67E8F9" class="glow">' + ('' if STATIC else '<animate attributeName="r" values="3;6;3" dur="3s" repeatCount="indefinite"/>') + '</circle>'
     save("hero.svg", s)
 
 
@@ -315,7 +316,7 @@ def draw_contributions(data: dict) -> None:
     s += t(36, 117, "MON", 8, C["dim"], 650)
     s += t(36, 157, "WED", 8, C["dim"], 650)
     s += t(36, 197, "FRI", 8, C["dim"], 650)
-    start_x, start_y, step, cell = 86, 92, 20, 13
+    start_x, start_y, step, cell = 86, 87, 20, 13
     # Draw in row-major order so the reveal cascades from top to bottom.
     for row in range(7):
         for col in range(52):
