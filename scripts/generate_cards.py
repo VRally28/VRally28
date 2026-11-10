@@ -171,6 +171,22 @@ def draw_hero() -> None:
     s += '<path d="M48 402H832" stroke="#dcdcd7"/><circle cx="832" cy="402" r="4" fill="#2f55ff"/>'
     save("hero.svg", s)
 
+def draw_world_tile(filename: str, label: str, word: str, description: str, accent: str, delay: float) -> None:
+    s = start(293, 222, True)
+    s += f'<g class="enter" style="animation-delay:{delay}s">'
+    s += f'<rect x="8" y="8" width="277" height="198" rx="10" fill="{C["bg"]}" stroke="{C["line"]}"/>'
+    s += f'<rect x="8" y="8" width="277" height="5" rx="2" fill="{accent}"/>'
+    s += t(26, 42, label, 10, accent, 750, 'letter-spacing="1.8"')
+    s += f'<text x="24" y="112" font-family="Georgia,Times New Roman,serif" font-size="34" fill="{C["white"]}">{escape(word)}</text>'
+    lines = [description[i:i+34] for i in range(0, min(len(description), 68), 34)]
+    for i, line in enumerate(lines[:2]):
+        s += t(26, 151+i*19, line, 11, C["muted"], 500)
+    s += f'<path d="M26 180H266" stroke="{C["line"]}"/>'
+    s += t(266, 197, "↗", 15, accent, 700, 'text-anchor="end"')
+    s += '</g>'
+    save(filename, s)
+
+
 def draw_social() -> None:
     # Social links are intentionally plain text in README, matching the reference.
     return
