@@ -237,8 +237,8 @@ def main() -> None:
     tile("build.svg","BUILD","Web & systems","Ideas shaped into useful tools.",BLUE,"#fff",1.4)
     tile("learn.svg","EXPLORE","New ground","AI, software and what comes next.",RED,"#fff",1.5)
     tile("community-v2.svg","CONTRIBUTE","Build together","Hackathons, community|and open source.",GOLD,INK,1.6)
-    title=f'<rect width="880" height="64" fill="{INK}"/><text class="r serif" {delay(1.7)} x="42" y="46" font-size="34" fill="#fff">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
-    write("title-coding.svg",880,64,title,"A few things I've built")
+    title=f'<rect width="880" height="64" fill="{INK}"/><text class="r serif" {delay(1.7)} x="24" y="46" font-size="34" fill="#fff">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
+    write("title-coding-v2.svg",880,64,title,"A few things I've built")
     repo_card("repo-codevibe.svg","CODEVIBE","A browser-based coding practice platform.|Built for learning by doing.","HTML · CSS · JAVASCRIPT",BLUE,1.8)
     repo_card("repo-hack-helix.svg","HACK HELIX","A collaborative hackathon project.|Made with a team, around a real problem.","HACKATHON · PRODUCT",RED,1.9)
     repo_card("repo-basketball-scorecard.svg","BASKETBALL SCORECARD","A focused frontend for tracking|the score and rhythm of a game.","FRONTEND · JAVASCRIPT",GOLD,2.0)
