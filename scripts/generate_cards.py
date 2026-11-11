@@ -239,9 +239,9 @@ def main() -> None:
     tile("community-v2.svg","CONTRIBUTE","Build together","Hackathons, community|and open source.",GOLD,INK,1.6)
     title=f'<rect width="880" height="64" fill="{INK}"/><text class="r serif" {delay(1.7)} x="0" y="46" font-size="34" fill="#fff">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
     write("title-coding-v3.svg",880,64,title,"A few things I've built")
-    repo_card("repo-codevibe.svg","CODEVIBE","A browser-based coding practice platform.|Built for learning by doing.","HTML · CSS · JAVASCRIPT",BLUE,1.8)
-    repo_card("repo-hack-helix.svg","HACK HELIX","A collaborative hackathon project.|Made with a team, around a real problem.","HACKATHON · PRODUCT",RED,1.9)
-    repo_card("repo-basketball-scorecard.svg","BASKETBALL SCORECARD","A focused frontend for tracking|the score and rhythm of a game.","FRONTEND · JAVASCRIPT",GOLD,2.0)
+    repo_card("repo-lead-2026.svg","LEAD 2026","Official society website|with 3D and AI features.","REACT · THREE.JS · WEBGL",BLUE,1.8)
+    repo_card("repo-blog-management.svg","BLOG MANAGEMENT","Manage posts with CRUD|and rich-text editing.","PHP · MYSQL",RED,1.9)
+    repo_card("repo-matrix-4.svg","MATRIX 4.0","Event site for MATRIX 4.0|with events and registration.","HTML · CSS · JAVASCRIPT",GOLD,2.0)
 
 
 if __name__ == "__main__":

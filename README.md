@@ -6,7 +6,7 @@
 <img src="cards/activity.svg" width="100%" alt="Monthly contributions, current streak, active days, and busiest day." /><br>
 <a href="https://github.com/VRally28/CODEVIBE-"><img src="cards/build.svg" width="32.5%" alt="Build — web and systems." /></a>&nbsp;&nbsp;<a href="https://github.com/VRally28/hack-helix"><img src="cards/learn.svg" width="32.5%" alt="Explore — new ground." /></a>&nbsp;&nbsp;<a href="https://github.com/VRally28"><img src="cards/community-v2.svg" width="32.5%" alt="Contribute — build together." /></a><br>
 <img src="cards/title-coding-v3.svg" width="100%" alt="A few things I've built" /><br>
-<a href="https://github.com/VRally28/CODEVIBE-"><img src="cards/repo-codevibe.svg" width="32.5%" alt="CodeVibe — browser-based coding practice platform." /></a>&nbsp;&nbsp;<a href="https://github.com/VRally28/hack-helix"><img src="cards/repo-hack-helix.svg" width="32.5%" alt="Hack Helix — collaborative hackathon project." /></a>&nbsp;&nbsp;<a href="https://github.com/VRally28/basketball-scorecard"><img src="cards/repo-basketball-scorecard.svg" width="32.5%" alt="Basketball Scorecard — frontend scoring interface." /></a>
+<a href="https://github.com/LEAD-Society-Thapar/Lead-2026-official"><img src="cards/repo-lead-2026.svg" width="32.5%" alt="LEAD 2026 — official society website with 3D and AI features." /></a>&nbsp;&nbsp;<a href="https://github.com/VRally28/blog-management-system"><img src="cards/repo-blog-management.svg" width="32.5%" alt="Blog Management — PHP and MySQL CRUD app with rich-text editing." /></a>&nbsp;&nbsp;<a href="https://github.com/manyaa08/MATRIX-4.0"><img src="cards/repo-matrix-4.svg" width="32.5%" alt="MATRIX 4.0 — event website with registration." /></a>
 </div>
 
 <p align="center">
