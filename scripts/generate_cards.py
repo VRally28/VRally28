@@ -205,10 +205,14 @@ def activity(data: dict) -> None:
 
 
 def tile(filename: str, eyebrow: str, title: str, sub: str, color: str, foreground: str, delay_s: float) -> None:
+    subtitle = "".join(
+        f'<tspan x="24" dy="{0 if i == 0 else 19}">{escape(line)}</tspan>'
+        for i, line in enumerate(sub.split("|"))
+    )
     out=[f'<rect width="293" height="220" rx="14" fill="{color}"/>',
          f'<g class="tile" {delay(delay_s)}><text x="24" y="37" font-size="11" letter-spacing="1" fill="{foreground}" font-family="monospace">{escape(eyebrow)}</text>',
          f'<text x="24" y="104" class="serif" font-size="38" fill="{foreground}">{escape(title)}</text>',
-         f'<text x="24" y="143" font-size="14" fill="{foreground}" opacity=".88">{escape(sub)}</text>',
+         f'<text x="24" y="143" font-size="14" fill="{foreground}" opacity=".88">{subtitle}</text>',
          f'<path d="M24 181H269" stroke="{foreground}" stroke-opacity=".28"/><text x="269" y="204" text-anchor="end" font-size="15" fill="{foreground}">↗</text></g>']
     write(filename,293,220,"".join(out),f"{eyebrow}: {title}. {sub}")
 
@@ -232,7 +236,7 @@ def main() -> None:
     activity(data)
     tile("build.svg","BUILD","Web & systems","Ideas shaped into useful tools.",BLUE,"#fff",1.4)
     tile("learn.svg","EXPLORE","New ground","AI, software and what comes next.",RED,"#fff",1.5)
-    tile("community.svg","CONTRIBUTE","Build together","Hackathons, community and open source.",GOLD,INK,1.6)
+    tile("community.svg","CONTRIBUTE","Build together","Hackathons, community|and open source.",GOLD,INK,1.6)
     title=f'<rect width="880" height="64" fill="{INK}"/><text class="r serif" {delay(1.7)} x="42" y="46" font-size="34" fill="#fff">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
     write("title-coding.svg",880,64,title,"A few things I've built")
     repo_card("repo-codevibe.svg","CODEVIBE","A browser-based coding practice platform.|Built for learning by doing.","HTML · CSS · JAVASCRIPT",BLUE,1.8)
