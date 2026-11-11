@@ -133,18 +133,17 @@ def hero() -> None:
     optimized = BytesIO()
     portrait.save(optimized, format="JPEG", quality=90, optimize=True)
     encoded = base64.b64encode(optimized.getvalue()).decode("ascii")
-    graphic = f'''<defs><clipPath id="portrait-circle"><circle cx="680" cy="210" r="182"/></clipPath></defs>
-    <g class="f" {delay(.45)}><circle cx="680" cy="210" r="191" fill="#e7eaff"/>
-    <circle cx="680" cy="210" r="189" fill="none" stroke="{BLUE}" stroke-opacity=".22" stroke-width="1"/>
-    <image href="data:image/jpeg;base64,{encoded}" x="498" y="28" width="364" height="364" preserveAspectRatio="xMidYMid slice" clip-path="url(#portrait-circle)"/>
-    <circle cx="680" cy="210" r="182" fill="none" stroke="{BLUE}" stroke-width="2"/></g>'''
-    body = f'''<rect width="880" height="420" rx="14" fill="{PAPER}"/>
+    graphic = f'''<defs><clipPath id="portrait-circle"><circle cx="704" cy="160" r="136"/></clipPath></defs>
+    <g class="f" {delay(.45)}><circle cx="704" cy="160" r="145" fill="#e7eaff"/>
+    <circle cx="704" cy="160" r="143" fill="none" stroke="{BLUE}" stroke-opacity=".22" stroke-width="1"/>
+    <image href="data:image/jpeg;base64,{encoded}" x="568" y="24" width="272" height="272" preserveAspectRatio="xMidYMid slice" clip-path="url(#portrait-circle)"/>
+    <circle cx="704" cy="160" r="136" fill="none" stroke="{BLUE}" stroke-width="2"/></g>'''
+    body = f'''<rect width="880" height="320" rx="14" fill="{PAPER}"/>
     <g class="f" {delay(0)}><rect class="live" x="48" y="49" width="8" height="8" rx="2" fill="{BLUE}"/>{text(66,57,"CSE STUDENT · THAPAR INSTITUTE",12,MUTED,"monospace",'letter-spacing="1"')}</g>
-    <text class="r name" {delay(.15)} x="44" y="174" font-size="100" letter-spacing="-1.5" fill="{INK}">Vansh</text>
-    <text class="r name" {delay(.3)} x="44" y="278" font-style="italic" font-size="100" letter-spacing="-1.5" fill="{INK}">Rally</text>
-    <g class="r" {delay(.55)}>{text(48,352,"I build useful things on the web and learn by making.",17,SOFT)}</g>
-    <g class="f" {delay(.8)}>{text(48,402,"BUILD · EXPLORE · CONTRIBUTE",12,MUTED,"monospace",'letter-spacing=".8"')}</g>{graphic}'''
-    write("hero-photo-v5.svg", 880, 420, body, "Vansh Rally — CSE student and developer building useful things on the web.")
+    <text class="r name" {delay(.15)} x="44" y="169" font-size="94" letter-spacing="-1.5" fill="{INK}">Vansh <tspan font-style="italic">Rally</tspan></text>
+    <g class="r" {delay(.45)}>{text(48,224,"I build useful things on the web and learn by making.",17,SOFT)}</g>
+    <g class="f" {delay(.7)}>{text(48,286,"BUILD · EXPLORE · CONTRIBUTE",12,MUTED,"monospace",'letter-spacing=".8"')}</g>{graphic}'''
+    write("hero-photo-v6.svg", 880, 320, body, "Vansh Rally — CSE student and developer building useful things on the web.")
 
 
 def heatmap(data: dict) -> None:
