@@ -237,8 +237,8 @@ def main() -> None:
     tile("build.svg","BUILD","Web & systems","Ideas shaped into useful tools.",BLUE,"#fff",1.4)
     tile("learn.svg","EXPLORE","New ground","AI, software and what comes next.",RED,"#fff",1.5)
     tile("community-v2.svg","CONTRIBUTE","Build together","Hackathons, community|and open source.",GOLD,INK,1.6)
-    title=f'<rect width="880" height="64" fill="{INK}"/><text class="r serif" {delay(1.7)} x="0" y="46" font-size="34" fill="#fff">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
-    write("title-coding-v3.svg",880,64,title,"A few things I've built")
+    title=f'<rect width="880" height="64" fill="{INK}"/><circle cx="6" cy="34" r="5" fill="{BLUE}"/><text class="r serif" {delay(1.7)} x="24" y="46" font-size="34" fill="#fff">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
+    write("title-coding-v4.svg",880,64,title,"A few things I've built")
     repo_card("repo-lead-2026.svg","LEAD 2026","Official society website|with 3D and AI features.","REACT · THREE.JS · WEBGL",BLUE,1.8)
     repo_card("repo-blog-management.svg","BLOG MANAGEMENT","Manage posts with CRUD|and rich-text editing.","PHP · MYSQL",RED,1.9)
     repo_card("repo-matrix-4.svg","MATRIX 4.0","Event site for MATRIX 4.0|with events and registration.","HTML · CSS · JAVASCRIPT",GOLD,2.0)
