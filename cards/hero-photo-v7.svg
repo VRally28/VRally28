@@ -5,11 +5,11 @@
 @keyframes pop{0%{opacity:0;transform:scale(.4)}75%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:none}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 @keyframes tilein{0%{opacity:0;transform:translateY(36px) scale(.96)}100%{opacity:1;transform:none}}
-.r{opacity:0;animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
-.f{opacity:0;animation:fade .8s ease-out both}
-.g{transform-box:fill-box;transform-origin:bottom;animation:grow .75s cubic-bezier(.2,.7,.2,1) both}
+.r{opacity:0;animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+.f{opacity:0;animation:fade .55s ease-out both}
+.g{transform-box:fill-box;transform-origin:bottom;animation:grow .55s cubic-bezier(.2,.7,.2,1) both}
 .p{opacity:0;transform-box:fill-box;transform-origin:center;animation:pop .42s ease-out both}
-.tile{opacity:0;animation:tilein .8s cubic-bezier(.2,.7,.2,1) both}
+.tile{opacity:0;animation:tilein .55s cubic-bezier(.2,.7,.2,1) both}
 .live{animation:pulse 1.6s ease-in-out infinite}
 @media(prefers-reduced-motion:reduce){.r,.f,.g,.p,.tile,.live{animation:none!important;opacity:1!important;transform:none!important}animate,animateTransform{display:none!important}}
 .static .r,.static .f,.static .g,.static .p,.static .tile,.static .live{animation:none!important;opacity:1!important;transform:none!important}
