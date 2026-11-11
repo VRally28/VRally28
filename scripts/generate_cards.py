@@ -33,11 +33,11 @@ CSS = """
 @keyframes pop{0%{opacity:0;transform:scale(.4)}75%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:none}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 @keyframes tilein{0%{opacity:0;transform:translateY(36px) scale(.96)}100%{opacity:1;transform:none}}
-.r{opacity:0;animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
-.f{opacity:0;animation:fade .8s ease-out both}
-.g{transform-box:fill-box;transform-origin:bottom;animation:grow .75s cubic-bezier(.2,.7,.2,1) both}
+.r{opacity:0;animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+.f{opacity:0;animation:fade .55s ease-out both}
+.g{transform-box:fill-box;transform-origin:bottom;animation:grow .55s cubic-bezier(.2,.7,.2,1) both}
 .p{opacity:0;transform-box:fill-box;transform-origin:center;animation:pop .42s ease-out both}
-.tile{opacity:0;animation:tilein .8s cubic-bezier(.2,.7,.2,1) both}
+.tile{opacity:0;animation:tilein .55s cubic-bezier(.2,.7,.2,1) both}
 .live{animation:pulse 1.6s ease-in-out infinite}
 @media(prefers-reduced-motion:reduce){.r,.f,.g,.p,.tile,.live{animation:none!important;opacity:1!important;transform:none!important}animate,animateTransform{display:none!important}}
 .static .r,.static .f,.static .g,.static .p,.static .tile,.static .live{animation:none!important;opacity:1!important;transform:none!important}
@@ -96,26 +96,29 @@ def refresh_data() -> None:
     }, indent=2) + "\n", encoding="utf-8")
 
 
-def font_face() -> str:
+def font_face(include_name: bool = False) -> str:
     faces = []
-    for path, family, style in ((FONT, "Inter", "normal"), (SERIF, "InstrumentSerif", "normal"), (SERIF_ITALIC, "InstrumentSerif", "italic")):
+    fonts = [(FONT, "Inter", "normal")]
+    if include_name:
+        fonts.extend(((SERIF, "InstrumentSerif", "normal"), (SERIF_ITALIC, "InstrumentSerif", "italic")))
+    for path, family, style in fonts:
         if path.exists():
             encoded = base64.b64encode(path.read_bytes()).decode("ascii")
             faces.append(f"@font-face{{font-family:{family};src:url(data:font/woff2;base64,{encoded}) format('woff2');font-style:{style};font-weight:400}}")
     return "".join(faces)
 
 
-def svg(width: int, height: int, body: str, label: str) -> str:
+def svg(width: int, height: int, body: str, label: str, include_name_font: bool = False) -> str:
     static = "static" if STATIC else ""
     body = "\n".join(line.rstrip() for line in body.splitlines())
-    style = font_face() + CSS + "text{font-family:Inter,Arial,sans-serif}.serif{font-family:Georgia,'Times New Roman',serif}.name{font-family:InstrumentSerif,Georgia,serif}"
+    style = font_face(include_name_font) + CSS + "text{font-family:Inter,Arial,sans-serif}.serif{font-family:Georgia,'Times New Roman',serif}.name{font-family:InstrumentSerif,Georgia,serif}"
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" '
             f'role="img" aria-label="{escape(label)}" class="{static}"><title>{escape(label)}</title><style>{style}</style>{body}</svg>\n')
 
 
-def write(name: str, width: int, height: int, body: str, label: str) -> None:
+def write(name: str, width: int, height: int, body: str, label: str, include_name_font: bool = False) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / name).write_text(svg(width, height, body, label), encoding="utf-8")
+    (OUT / name).write_text(svg(width, height, body, label, include_name_font), encoding="utf-8")
 
 
 def text(x, y, value, size=16, color=INK, family="Inter,Arial,sans-serif", extra=""):
@@ -143,7 +146,7 @@ def hero() -> None:
     <text class="r name" {delay(.15)} x="44" y="169" font-size="94" letter-spacing="-1.5" fill="{INK}">Vansh <tspan font-style="italic">Rally</tspan></text>
     <g class="r" {delay(.45)}>{text(48,224,"I build useful things on the web and learn by making.",17,SOFT)}</g>
     <g class="f" {delay(.7)}>{text(48,286,"BUILD · EXPLORE · CONTRIBUTE",12,MUTED,"monospace",'letter-spacing=".8"')}</g>{graphic}'''
-    write("hero-photo-v7.svg", 880, 320, body, "Vansh Rally — CSE student and developer building useful things on the web.")
+    write("hero-photo-v7.svg", 880, 320, body, "Vansh Rally — CSE student and developer building useful things on the web.", include_name_font=True)
 
 
 def heatmap(data: dict) -> None:
@@ -157,8 +160,8 @@ def heatmap(data: dict) -> None:
     cols = min(53, (end-start).days // 7 + 1)
     x0, y0, step, cell = 44, 93, 15, 12
     out = [f'<rect width="880" height="205" rx="14" fill="{PAPER}"/>',
-           f'<text class="r serif" {delay(6.35)} x="42" y="57" font-size="34" fill="{INK}">Every day, <tspan font-style="italic" fill="{BLUE}">in blue</tspan></text>',
-           f'<text class="f" {delay(6.35)} x="836" y="54" text-anchor="end" font-size="11" letter-spacing="1" fill="{MUTED}" font-family="monospace">REFRESHED DAILY</text>']
+           f'<text class="r serif" {delay(.5)} x="42" y="57" font-size="34" fill="{INK}">Every day, <tspan font-style="italic" fill="{BLUE}">in blue</tspan></text>',
+           f'<text class="f" {delay(.5)} x="836" y="54" text-anchor="end" font-size="11" letter-spacing="1" fill="{MUTED}" font-family="monospace">REFRESHED DAILY</text>']
     previous = None
     for col in range(cols):
         sunday = start + timedelta(days=col*7)
@@ -170,7 +173,7 @@ def heatmap(data: dict) -> None:
             if d > end: continue
             count = day_counts.get(d, 0)
             level = 0 if count == 0 else min(5, 1 + (count-1)//5)
-            out.append(f'<rect class="p" {delay(6.55+col*.012+row*.008)} x="{x0+col*step}" y="{y0+row*step}" width="{cell}" height="{cell}" rx="3" fill="{PALETTE[level]}"><title>{d.isoformat()}: {count} contributions</title></rect>')
+            out.append(f'<rect class="p" {delay(.65+col*.003+row*.004)} x="{x0+col*step}" y="{y0+row*step}" width="{cell}" height="{cell}" rx="3" fill="{PALETTE[level]}"><title>{d.isoformat()}: {count} contributions</title></rect>')
     out.append(text(44, 197, "LESS", 9, MUTED, "monospace"))
     for i, color in enumerate(PALETTE): out.append(f'<rect x="{702+i*16}" y="185" width="11" height="11" rx="3" fill="{color}"/>')
     out.append(text(806, 197, "MORE", 9, MUTED, "monospace"))
@@ -182,20 +185,20 @@ def activity(data: dict) -> None:
     maxval = max([int(v) for _, v in months] or [1])
     x0, base, chart_h, bw, gap = 40, 287, 145, 36, 11
     out = [f'<rect width="880" height="340" rx="14" fill="{PAPER}"/>',
-           f'<text class="f" {delay(7.55)} x="40" y="54" font-size="11" letter-spacing="1" fill="{MUTED}" font-family="monospace">THE LAST 12 MONTHS ON GITHUB</text>',
-           f'<text class="r serif" {delay(7.65)} x="38" y="111" font-size="49" fill="{INK}">{int(data.get("total_contributions",0)):,} <tspan font-style="italic">contributions</tspan></text>']
+           f'<text class="f" {delay(.9)} x="40" y="54" font-size="11" letter-spacing="1" fill="{MUTED}" font-family="monospace">THE LAST 12 MONTHS ON GITHUB</text>',
+           f'<text class="r serif" {delay(.95)} x="38" y="111" font-size="49" fill="{INK}">{int(data.get("total_contributions",0)):,} <tspan font-style="italic">contributions</tspan></text>']
     best = max(months, key=lambda item: int(item[1]), default=("",0))
     for i, (month, value) in enumerate(months):
         h = max(4, round(int(value)/maxval*chart_h))
         x = x0+i*(bw+gap)
         color = BLUE if (month,value)==best else ("#c9c9c4" if i==len(months)-1 else INK)
-        out.append(f'<rect class="g" {delay(7.85+i*.055)} x="{x}" y="{base-h}" width="{bw}" height="{h}" rx="4" fill="{color}"><title>{month}: {int(value):,}</title></rect>')
+        out.append(f'<rect class="g" {delay(1.05+i*.02)} x="{x}" y="{base-h}" width="{bw}" height="{h}" rx="4" fill="{color}"><title>{month}: {int(value):,}</title></rect>')
         out.append(text(x+bw/2, base+21, date.fromisoformat(month+"-01").strftime("%b"), 9, MUTED, "monospace",'text-anchor="middle"'))
     busy=data.get("busiest_day", {})
     metrics=[(f'{data.get("current_streak",0)} days',"current streak"),(str(data.get("active_days",0)),"active days"),(str(busy.get("count",0)),"on the busiest day")]
     for i,(big,small) in enumerate(metrics):
         y=105+i*82
-        out.append(f'<g class="r" {delay(7.8+i*.15)}>{text(650,y,big,34,INK,"Georgia,serif")}{text(650,y+24,small,13,MUTED)}</g>')
+        out.append(f'<g class="r" {delay(1.05+i*.08)}>{text(650,y,big,34,INK,"Georgia,serif")}{text(650,y+24,small,13,MUTED)}</g>')
         if i<2: out.append(f'<line x1="650" y1="{y+43}" x2="836" y2="{y+43}" stroke="#d8d8d4"/>')
     out.append(text(650, 339-6, f'BUSIEST DAY  {busy.get("date","—")}', 9, MUTED, "monospace"))
     write("activity.svg", 880, 340, "".join(out), f'{int(data.get("total_contributions",0)):,} contributions, {data.get("current_streak",0)} day streak, {data.get("active_days",0)} active days.')
@@ -227,14 +230,14 @@ def main() -> None:
     hero()
     heatmap(data)
     activity(data)
-    tile("build.svg","BUILD","Web & systems","Ideas shaped into useful tools.",BLUE,"#fff",9.1)
-    tile("learn.svg","EXPLORE","New ground","AI, software and what comes next.",RED,"#fff",9.35)
-    tile("community.svg","CONTRIBUTE","Build together","Hackathons, community and open source.",GOLD,INK,9.6)
-    title=f'<rect width="880" height="64" fill="{INK}"/><text class="r serif" {delay(11.1)} x="42" y="46" font-size="34" fill="#fff">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
+    tile("build.svg","BUILD","Web & systems","Ideas shaped into useful tools.",BLUE,"#fff",1.4)
+    tile("learn.svg","EXPLORE","New ground","AI, software and what comes next.",RED,"#fff",1.5)
+    tile("community.svg","CONTRIBUTE","Build together","Hackathons, community and open source.",GOLD,INK,1.6)
+    title=f'<rect width="880" height="64" fill="{INK}"/><text class="r serif" {delay(1.7)} x="42" y="46" font-size="34" fill="#fff">A few things <tspan font-style="italic">I\'ve built</tspan></text>'
     write("title-coding.svg",880,64,title,"A few things I've built")
-    repo_card("repo-codevibe.svg","CODEVIBE","A browser-based coding practice platform.|Built for learning by doing.","HTML · CSS · JAVASCRIPT",BLUE,11.5)
-    repo_card("repo-hack-helix.svg","HACK HELIX","A collaborative hackathon project.|Made with a team, around a real problem.","HACKATHON · PRODUCT",RED,11.65)
-    repo_card("repo-basketball-scorecard.svg","BASKETBALL SCORECARD","A focused frontend for tracking|the score and rhythm of a game.","FRONTEND · JAVASCRIPT",GOLD,11.8)
+    repo_card("repo-codevibe.svg","CODEVIBE","A browser-based coding practice platform.|Built for learning by doing.","HTML · CSS · JAVASCRIPT",BLUE,1.8)
+    repo_card("repo-hack-helix.svg","HACK HELIX","A collaborative hackathon project.|Made with a team, around a real problem.","HACKATHON · PRODUCT",RED,1.9)
+    repo_card("repo-basketball-scorecard.svg","BASKETBALL SCORECARD","A focused frontend for tracking|the score and rhythm of a game.","FRONTEND · JAVASCRIPT",GOLD,2.0)
 
 
 if __name__ == "__main__":
